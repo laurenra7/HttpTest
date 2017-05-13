@@ -71,7 +71,6 @@ Examples:
   HttpComponentsHttpClient	org.apache.http.client.HttpClient
   SpringRestTemplate		org.springframework.web.client.RestTemplate
 
-
 The Apache Commons HttpClient was widely used until a few years ago but
 has been deprecated and replaced by HttpComponents HttpClient.
 ```

@@ -308,7 +308,7 @@ public class HttpTest {
         System.out.println("*If no HTTP method is specified, HTTP GET is used.");
         System.out.println("*If no library is specified, SpringRestTemplate is used. The libraries are:\n");
         HttpLib.showPrettyList();
-        System.out.println("\n\nThe Apache Commons HttpClient was widely used until a few years ago but\n" +
+        System.out.println("\nThe Apache Commons HttpClient was widely used until a few years ago but\n" +
         "has been deprecated and replaced by HttpComponents HttpClient.");
     }
 
