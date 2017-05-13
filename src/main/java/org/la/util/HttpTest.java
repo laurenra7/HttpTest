@@ -305,7 +305,7 @@ public class HttpTest {
 
         HelpFormatter helpFormatter = new HelpFormatter();
         helpFormatter.printHelp(88,"java -jar httptest.jar HttpMethod URL", commandHelpHeader, options, commandHelpFooter, true);
-        System.out.println("*If no HTTP method is specified, HTTP GET is used.\n");
+        System.out.println("*If no HTTP method is specified, HTTP GET is used.");
         System.out.println("*If no library is specified, SpringRestTemplate is used. The libraries are:\n");
         HttpLib.showPrettyList();
         System.out.println("\n\nThe Apache Commons HttpClient was widely used until a few years ago but\n" +

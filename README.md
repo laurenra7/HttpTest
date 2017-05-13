@@ -2,6 +2,7 @@
 Test making an HTTP request to a URL using different Java HTTP libraries.
 
 If no library is specified, Spring Framework [RestTemplate](https://docs.spring.io/spring/docs/current/javadoc-api/index.html?org/springframework/web/client/RestTemplate.html) is used.
+If no HTTP method is specified, HTTP GET is used.
 
 The other libraries are:
 
@@ -14,6 +15,8 @@ The other libraries are:
 See [REST in Spring 3: RestTemplate](https://spring.io/blog/2009/03/27/rest-in-spring-3-resttemplate) for tutorial and examples.
 
 Spring uses the [HttpClient](http://hc.apache.org/httpcomponents-client-ga/index.html) from [Apache HttpComponents](http://hc.apache.org/) for the HTTP requests.
+
+The Apache Commons HttpClient was widely used until a few years ago but has been deprecated and replaced by HttpComponents HttpClient.
 
 ### Build
 
@@ -62,7 +65,6 @@ Examples:
   java -jar httptest.jar -o myfile.txt GET https://someurl.com/get/stuff
 
 *If no HTTP method is specified, HTTP GET is used.
-
 *If no library is specified, SpringRestTemplate is used. The libraries are:
 
   CommonsHttpClient		org.apache.commons.httpclient.HttpClient
