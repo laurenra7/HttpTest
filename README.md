@@ -5,6 +5,7 @@ If no library is specified, Spring Framework [RestTemplate](https://docs.spring.
 
 The other libraries are:
 
+| Library                  | Class                                       |
 | ------------------------ | ------------------------------------------- |
 | CommonsHttpClient        | [org.apache.commons.httpclient.HttpClient](http://hc.apache.org/httpclient-3.x/)    |
 | HttpComponentsHttpClient | [org.apache.http.client.HttpClient](https://hc.apache.org/httpcomponents-client-ga/httpclient/apidocs/index.html?org/apache/http/client/HttpClient.html)           |
