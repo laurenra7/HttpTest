@@ -74,7 +74,7 @@ public class HttpTest {
                 .build());
         clOptions.addOption(Option.builder("v")
                 .longOpt("verbose")
-                .desc("show processing messages")
+                .desc("show request/response details and processing messages")
                 .build());
 
         if(args.length == 0) {

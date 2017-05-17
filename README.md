@@ -54,7 +54,7 @@ If no library is specified, SpringRestTemplate is used.
                           HttpComponentsHttpClient
                           SpringRestTemplate
  -o,--output <filename>   output file
- -v,--verbose             show processing messages
+ -v,--verbose             show request/response details and processing messages
 
 Examples:
 
