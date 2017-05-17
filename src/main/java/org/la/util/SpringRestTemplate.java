@@ -4,8 +4,6 @@ import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.ClientHttpRequestInterceptor;
 import org.springframework.web.client.RestClientException;
@@ -66,8 +64,8 @@ public class SpringRestTemplate {
             httpService.setInterceptors(requestInterceptorList);
         }
 
-        HttpHeaders httpHeaders = new HttpHeaders();
-        HttpEntity<String> httpEntity = new HttpEntity<>(httpHeaders);
+//        HttpHeaders httpHeaders = new HttpHeaders();
+//        HttpEntity<String> httpEntity = new HttpEntity<>(httpHeaders);
 
         try {
             response = httpService.getForEntity(uri, String.class);
