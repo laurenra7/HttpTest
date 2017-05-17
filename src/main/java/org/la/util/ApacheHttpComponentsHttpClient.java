@@ -9,21 +9,19 @@ import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.HttpClientBuilder;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Created by laurenra on 5/12/17.
  */
 public class ApacheHttpComponentsHttpClient implements HttpProcessor {
 
-    private static final Logger log = LoggerFactory.getLogger(ApacheHttpComponentsHttpClient.class);
+//    private static final Logger log = LoggerFactory.getLogger(ApacheHttpComponentsHttpClient.class);
 
     public String httpGet(String url, boolean modeVerbose) {
         String result = "";
 
         if (modeVerbose) {
-            System.out.println("Http GET from URL: " + url);
+            System.out.println("HTTP GET from URL: " + url);
         }
 
         HttpClient httpClient = HttpClientBuilder.create().build();
@@ -37,21 +35,21 @@ public class ApacheHttpComponentsHttpClient implements HttpProcessor {
             int responseCode = httpResponse.getStatusLine().getStatusCode();
 
             if (modeVerbose) {
-                result = result + "HTTP response code: " + httpResponse.getStatusLine().getStatusCode() + "\n";
+                System.out.println("HTTP response code: " + httpResponse.getStatusLine().getStatusCode());
             }
 
             if (responseCode == HttpStatus.SC_OK) {
                 if (modeVerbose) {
-                    result = result + "---------- Request Header ----------\n";
+                    System.out.println("---------- Request Header ----------");
                     org.apache.http.Header[] requestHeaders = httpGet.getAllHeaders();
                     for (org.apache.http.Header reqHeader : requestHeaders) {
-                        result = result + reqHeader.getName() + ": " + reqHeader.getValue() + "\n";
+                        System.out.println(reqHeader.getName() + ": " + reqHeader.getValue());
                     }
 
-                    result = result + "---------- Response Header ----------\n";
+                    System.out.println("---------- Response Header ----------");
                     org.apache.http.Header[] responseHeaders = httpResponse.getAllHeaders();
                     for (org.apache.http.Header respHeader : responseHeaders) {
-                        result = result + respHeader.getName() + ": " + respHeader.getValue() + "\n";
+                        System.out.println(respHeader.getName() + ": " + respHeader.getValue());
                     }
                 }
 
@@ -68,7 +66,7 @@ public class ApacheHttpComponentsHttpClient implements HttpProcessor {
                     responseBody.deleteCharAt(0); // delete initial newline
 
                     if (modeVerbose) {
-                        result = result + "---------- Response Body ----------\n";
+                        System.out.println("---------- Response Body ----------");
                     }
 
                     result = result + responseBody;

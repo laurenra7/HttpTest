@@ -26,25 +26,29 @@ public class ApacheCommonsHttpClient implements HttpProcessor {
         BufferedReader buffer = null;
         String result = "";
 
+        if (modeVerbose) {
+            System.out.println("HTTP GET from URL: " + url);
+        }
+
         try {
             int responseCode = client.executeMethod(getMethod);
 
             if (modeVerbose) {
-                result = result + "HTTP response code: " + responseCode + "\n";
+                System.out.println("HTTP response code: " + responseCode);
             }
             if (responseCode == HttpStatus.SC_OK) {
 
                 if (modeVerbose) {
-                    result = result + "---------- Request Header ----------\n";
+                    System.out.println("---------- Request Header ----------");
                     Header[] requestHeaders = getMethod.getRequestHeaders();
                     for (Header reqHeader : requestHeaders) {
-                        result = result + reqHeader.getName() + ": " + reqHeader.getValue() + "\n";
+                        System.out.println(reqHeader.getName() + ": " + reqHeader.getValue());
                     }
 
-                    result = result + "---------- Response Header ----------\n";
+                    System.out.println("---------- Response Header ----------");
                     Header[] responseHeaders = getMethod.getResponseHeaders();
                     for (Header respHeader : responseHeaders) {
-                        result = result + respHeader.getName() + ": " + respHeader.getValue() + "\n";
+                        System.out.println(respHeader.getName() + ": " + respHeader.getValue());
                     }
                 }
 
@@ -62,7 +66,7 @@ public class ApacheCommonsHttpClient implements HttpProcessor {
                 stringBuilder.deleteCharAt(0); // delete initial newline
 
                 if (modeVerbose) {
-                    result = result + "---------- Response Body ----------\n";
+                    System.out.println("---------- Response Body ----------");
                 }
 
                 result = result + stringBuilder.toString();

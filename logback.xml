@@ -24,21 +24,18 @@
 
     <contextListener class="ch.qos.logback.classic.jul.LevelChangePropagator"/>
 
-    <appender name="FILE" class="ch.qos.logback.core.FileAppender">
-        <File>httptest.log</File>
-        <!--<rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">-->
-            <!--<fileNamePattern>httpgetspring.%d{yyyy-MM-dd}.log.gz</fileNamePattern>-->
-        <!--</rollingPolicy>-->
-        <encoder>
-            <pattern>%d{ISO8601} [%thread] %-5level %logger{36} - %msg%n</pattern>
-            <!--<pattern>%-4relative [%thread] %-5level %logger{35} - %msg %n</pattern>-->
-        </encoder>
-    </appender>
-
-    <!--<appender name="STDOUT" class="ch.qos.logback.core.">-->
-        <!--<File>httpgetspring.log</File>-->
+    <!--<appender name="FILE" class="ch.qos.logback.core.FileAppender">-->
+        <!--<File>httptest.log</File>-->
         <!--<encoder>-->
-            <!--<pattern>%-4relative [%thread] %-5level %logger{35} - %msg %n</pattern>-->
+            <!--<pattern>%d{ISO8601} [%thread] %-5level %logger{36} - %msg%n</pattern>-->
+            <!--&lt;!&ndash;<pattern>%-4relative [%thread] %-5level %logger{35} - %msg %n</pattern>&ndash;&gt;-->
+        <!--</encoder>-->
+    <!--</appender>-->
+
+    <!--<appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">-->
+        <!--<encoder>-->
+            <!--<pattern>%d{ISO8601} [%thread] %-5level %logger{36} - %msg%n</pattern>-->
+            <!--&lt;!&ndash;<pattern>%-4relative [%thread] %-5level %logger{35} - %msg %n</pattern>&ndash;&gt;-->
         <!--</encoder>-->
     <!--</appender>-->
 
@@ -51,11 +48,11 @@
     -->
 
     <root level="INFO">
-        <appender-ref ref="FILE" />
+        <appender-ref ref="STDOUT" />
     </root>
 
     <logger name="org.la.util" level="DEBUG" additivity="false">
-        <appender-ref ref="FILE" />
+        <appender-ref ref="STDOUT" />
     </logger>
 
     <!--<logger name="httpclient.wire" level="DEBUG" additivity="false">-->
@@ -67,11 +64,11 @@
     <!--</logger>-->
 
     <logger name="org.springframework.web.client" level="DEBUG" additivity="false">
-        <appender-ref ref="FILE" />
+        <appender-ref ref="STDOUT" />
     </logger>
 
     <logger name="org.springframework.http.client" level="DEBUG" additivity="false">
-        <appender-ref ref="FILE" />
+        <appender-ref ref="STDOUT" />
     </logger>
 
     <!-- Watch CAS client calls and server response detail -->

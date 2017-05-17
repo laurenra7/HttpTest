@@ -14,15 +14,13 @@ import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpMethod;
 
 /**
  * Created by laurenra on 5/12/17.
  */
 public class HttpTest {
-    private static final Logger log = LoggerFactory.getLogger(SpringRestTemplate.class);
+//    private static final Logger log = LoggerFactory.getLogger(SpringRestTemplate.class);
 
     private static class HttpLib {
         public static final String CommonsHttpClient = "CommonsHttpClient";
@@ -49,8 +47,6 @@ public class HttpTest {
     public static void main(String[] args) {
 
         int exitStatus = 0;
-
-        log.info("Logger is working...");
 
         // Build command line options
         Options clOptions = new Options();
@@ -181,45 +177,51 @@ public class HttpTest {
 
 
     private static void optionGet(CommandLine commandLine, String url, boolean modeVerbose) {
-        // Use Java Http library specified
+        String outputFilename = null;
+
+        if (commandLine.hasOption("output")) {
+            outputFilename = commandLine.getOptionValue("output");
+        }
+
         if (commandLine.hasOption("library")) {
+            // Use Java Http library specified
             switch (commandLine.getOptionValue("library")) {
                 case HttpLib.CommonsHttpClient:
                     if (modeVerbose) {
                         System.out.println("Using " + HttpLib.CommonsHttpClientClass + " for HTTP processing.");
                     }
-                    doGetApacheCommons(url, commandLine, modeVerbose);
+                    doGetApacheCommons(url, outputFilename, modeVerbose);
                     break;
                 case HttpLib.HttpComponentsHttpClient:
                     if (modeVerbose) {
                         System.out.println("Using " + HttpLib.HttpComponentsHttpClientClass + " for HTTP processing.");
                     }
-                    doGetApacheHttpComponents(url, commandLine, modeVerbose);
+                    doGetApacheHttpComponents(url, outputFilename, modeVerbose);
                     break;
                 default:
                     if (modeVerbose) {
                         System.out.println("Using " + HttpLib.SpringRestTemplateClass + " for HTTP processing.");
                     }
-                    doGetSpringRestTemplate(url, commandLine, modeVerbose);
+                    doGetSpringRestTemplate(url, outputFilename, modeVerbose);
                     break;
             }
         }
-        // Otherwise default to Spring RestTemplate
         else {
+            // Otherwise default to Spring RestTemplate
             if (modeVerbose) {
                 System.out.println("Using " + HttpLib.SpringRestTemplateClass + " for HTTP processing.");
             }
-            doGetSpringRestTemplate(url, commandLine, modeVerbose);
+            doGetSpringRestTemplate(url, outputFilename, modeVerbose);
         }
     }
 
 
-    private static void doGetApacheCommons(String url, CommandLine commandLine, boolean modeVerbose) {
+    private static void doGetApacheCommons(String url, String outputFilename, boolean modeVerbose) {
         ApacheCommonsHttpClient httpClient = new ApacheCommonsHttpClient();
         String response = httpClient.httpGet(url, modeVerbose);
         if (response != null && response.length() > 0) {
-            if (commandLine.hasOption("output")) {
-                writeStringToFile(response, commandLine.getOptionValue("filename"), modeVerbose);
+            if (outputFilename != null && outputFilename.length() > 0) {
+                writeStringToFile(response, outputFilename, modeVerbose);
             }
             else {
                 System.out.println(response);
@@ -228,12 +230,12 @@ public class HttpTest {
     }
 
 
-    private static void doGetApacheHttpComponents(String url, CommandLine commandLine, boolean modeVerbose) {
+    private static void doGetApacheHttpComponents(String url, String outputFilename, boolean modeVerbose) {
         ApacheHttpComponentsHttpClient httpClient = new ApacheHttpComponentsHttpClient();
         String response = httpClient.httpGet(url, modeVerbose);
         if (response != null && response.length() > 0) {
-            if (commandLine.hasOption("output")) {
-                writeStringToFile(response, commandLine.getOptionValue("filename"), modeVerbose);
+            if (outputFilename != null && outputFilename.length() > 0) {
+                writeStringToFile(response, outputFilename, modeVerbose);
             }
             else {
                 System.out.println(response);
@@ -242,12 +244,12 @@ public class HttpTest {
     }
 
 
-    private static void doGetSpringRestTemplate(String url, CommandLine commandLine, boolean modeVerbose) {
+    private static void doGetSpringRestTemplate(String url, String outputFilename, boolean modeVerbose) {
         SpringRestTemplate httpClient = new SpringRestTemplate();
         String response = httpClient.httpGet(url, modeVerbose);
         if (response != null && response.length() > 0) {
-            if (commandLine.hasOption("output")) {
-                writeStringToFile(response, commandLine.getOptionValue("filename"), modeVerbose);
+            if (outputFilename != null && outputFilename.length() > 0) {
+                writeStringToFile(response, outputFilename, modeVerbose);
             }
             else {
                 System.out.println(response);
@@ -262,7 +264,7 @@ public class HttpTest {
         FileWriter fileWriter = null;
 
         if (modeVerbose) {
-            System.out.println("Output file: " + outputFilename);
+            System.out.println("Writing results to file " + outputFilename);
         }
 
         try {
