@@ -28,7 +28,6 @@ public class ApacheCommonsHttpClient implements HttpProcessor {
 
         if (modeVerbose) {
             System.out.println("HTTP GET from URL: " + url);
-            log.debug("HTTP GET from URL: " + url);
         }
 
         try {
@@ -36,24 +35,20 @@ public class ApacheCommonsHttpClient implements HttpProcessor {
 
             if (modeVerbose) {
                 System.out.println("HTTP response code: " + responseCode);
-                log.debug("HTTP response code: " + responseCode);
             }
             if (responseCode == HttpStatus.SC_OK) {
 
                 if (modeVerbose) {
                     System.out.println("---------- Request Header ----------");
-                    log.debug("---------- Request Header ----------");
                     Header[] requestHeaders = getMethod.getRequestHeaders();
                     for (Header reqHeader : requestHeaders) {
                         System.out.println(reqHeader.getName() + ": " + reqHeader.getValue());
                     }
 
                     System.out.println("---------- Response Header ----------");
-                    log.debug("---------- Response Header ----------");
                     Header[] responseHeaders = getMethod.getResponseHeaders();
                     for (Header respHeader : responseHeaders) {
                         System.out.println(respHeader.getName() + ": " + respHeader.getValue());
-                        log.debug(respHeader.getName() + ": " + respHeader.getValue());
                     }
                 }
 
@@ -72,7 +67,6 @@ public class ApacheCommonsHttpClient implements HttpProcessor {
 
                 if (modeVerbose) {
                     System.out.println("---------- Response Body ----------");
-                    log.debug("---------- Response Body ----------");
                 }
 
                 result = result + stringBuilder.toString();
