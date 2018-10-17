@@ -6,17 +6,21 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import org.apache.commons.cli.*;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+
+import org.apache.commons.cli.CommandLine;
+import org.apache.commons.cli.CommandLineParser;
+import org.apache.commons.cli.DefaultParser;
+import org.apache.commons.cli.HelpFormatter;
+import org.apache.commons.cli.Option;
+import org.apache.commons.cli.Options;
+import org.apache.commons.cli.ParseException;
 import org.springframework.http.HttpMethod;
 
 /**
  * Created by laurenra on 5/12/17.
  */
 public class HttpTest {
-
-    private static final Logger log = LoggerFactory.getLogger(HttpTest.class);
+//    private static final Logger log = LoggerFactory.getLogger(SpringRestTemplate.class);
 
     private static class HttpLib {
         public static final String CommonsHttpClient = "CommonsHttpClient";
@@ -185,21 +189,18 @@ public class HttpTest {
                 case HttpLib.CommonsHttpClient:
                     if (modeVerbose) {
                         System.out.println("Using " + HttpLib.CommonsHttpClientClass + " for HTTP processing.");
-                        log.debug("Using " + HttpLib.CommonsHttpClientClass + " for HTTP processing.");
                     }
                     doGetApacheCommons(url, outputFilename, modeVerbose);
                     break;
                 case HttpLib.HttpComponentsHttpClient:
                     if (modeVerbose) {
                         System.out.println("Using " + HttpLib.HttpComponentsHttpClientClass + " for HTTP processing.");
-                        log.debug("Using " + HttpLib.HttpComponentsHttpClientClass + " for HTTP processing.");
                     }
                     doGetApacheHttpComponents(url, outputFilename, modeVerbose);
                     break;
                 default:
                     if (modeVerbose) {
                         System.out.println("Using " + HttpLib.SpringRestTemplateClass + " for HTTP processing.");
-                        log.debug("Using " + HttpLib.SpringRestTemplateClass + " for HTTP processing.");
                     }
                     doGetSpringRestTemplate(url, outputFilename, modeVerbose);
                     break;
@@ -209,13 +210,9 @@ public class HttpTest {
             // Otherwise default to Spring RestTemplate
             if (modeVerbose) {
                 System.out.println("Using " + HttpLib.SpringRestTemplateClass + " for HTTP processing.");
-                log.debug("Using " + HttpLib.SpringRestTemplateClass + " for HTTP processing.");
             }
             doGetSpringRestTemplate(url, outputFilename, modeVerbose);
         }
-
-//        Jersey1RestTest.testRest();
-//        Jersey2RestTest.testRest();
     }
 
 
