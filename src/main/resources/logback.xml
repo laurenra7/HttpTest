@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration debug="false">
+
+    <contextName>httptest</contextName>
+
+    <!--
+     | Propagate log levels to java.util.logging
+     +-->
+    <contextListener class="ch.qos.logback.classic.jul.LevelChangePropagator">
+        <resetJUL>true</resetJUL>
+    </contextListener>
+
+    <!--<appender name="MYSTDOUT" class="ch.qos.logback.core.ConsoleAppender">-->
+        <!--<encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">-->
+            <!--<pattern>%msg%n</pattern>-->
+            <!--<pattern>%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n</pattern>-->
+        <!--</encoder>-->
+    <!--</appender>-->
+
+<!--
+ | Setup a file based logger that rolls
+ |
+ | http://logback.qos.ch/manual/appenders.html#RollingFileAppender
+ +-->
+    <appender name="MYLOGFILE" class="ch.qos.logback.core.FileAppender">
+        <!--
+         | Name of the current log file
+         +-->
+        <File>${CONTEXT_NAME}.log</File>
+
+        <!--
+         | Log message pattern configuration
+         |
+         | http://logback.qos.ch/manual/layouts.html#conversionWord
+         +-->
+        <encoder>
+            <pattern>%d{ISO8601} [%thread] %-5level %logger{36} - %msg%n</pattern>
+            <!--<pattern>%-5level [%thread] %logger{36} %d{ISO8601} - %msg%n</pattern>-->
+            <!--<pattern>%-4relative [%thread] %-5level %logger{35} - %msg %n</pattern>-->
+        </encoder>
+
+        <!--
+         | Rolls the log file every 24 hours
+         | gzip the archived log file
+         | Delete archived log files older than 28 days
+         |
+         | http://logback.qos.ch/manual/appenders.html#TimeBasedRollingPolicy
+         +-->
+        <!--<rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">-->
+            <!--<fileNamePattern>${CONTEXT_NAME}.log.%d{yyyy-MM-dd}.gz</fileNamePattern>-->
+            <!--<maxHistory>28</maxHistory>-->
+        <!--</rollingPolicy>-->
+    </appender>
+
+    <!--<appender name="MYSTDOUT" class="ch.qos.logback.core.ConsoleAppender">-->
+    <!--<encoder>-->
+    <!--<pattern>%d{ISO8601} [%thread] %-5level %logger{36} - %msg%n</pattern>-->
+    <!--&lt;!&ndash;<pattern>%-4relative [%thread] %-5level %logger{35} - %msg %n</pattern>&ndash;&gt;-->
+    <!--</encoder>-->
+    <!--</appender>-->
+
+    <!--
+    <logger name="org.apache.commons.httpclient" level="DEBUG"/>
+    <logger name="httpclient.wire" level="DEBUG"/>
+    <logger name="edu.wisc" level="DEBUG"/>
+    <logger name="org.springframework" level="DEBUG"/>
+    <logger name="edu.byu" level="DEBUG"/>
+    -->
+
+    <!--
+    | Setup default log level to INFO
+    +-->
+    <root level="INFO">
+        <appender-ref ref="MYLOGFILE" />
+        <!--<appender-ref ref="MYSTDOUT" />-->
+    </root>
+
+    <!--
+    | Turn up logging for specific package
+    +-->
+
+    <!-- Apache Commons HttpClient, uses Apache (Jakarta) Commons Logging (jcl-over-slf4j) -->
+    <logger name="org.apache.commons.httpclient" level="DEBUG" additivity="false">
+        <appender-ref ref="MYLOGFILE" />
+    </logger>
+
+    <!-- Apache Commons HttpClient, show raw headers and content -->
+    <logger name="httpclient.wire" level="DEBUG" additivity="false">
+        <appender-ref ref="MYLOGFILE" />
+    </logger>
+
+    <!-- Uses SLF4J / Logback logging -->
+    <!--<logger name="org.la.util" level="DEBUG" additivity="false">-->
+        <!--<appender-ref ref="MYLOGFILE" />-->
+        <!--<appender-ref ref="MYSTDOUT" />-->
+    <!--</logger>-->
+
+    <!-- Uses java.util.logging (jul-to-slf4j)
+
+        FINEST  -> TRACE
+        FINER   -> DEBUG
+        FINE    -> DEBUG
+        INFO    -> INFO
+        WARNING -> WARN
+        SEVERE  -> ERROR
+
+        See https://www.slf4j.org/api/org/slf4j/bridge/SLF4JBridgeHandler.html
+    -->
+    <!--<logger name="org.la.jul.Jersey1RestTest" level="DEBUG" additivity="false">-->
+        <!--<appender-ref ref="MYLOGFILE" />-->
+    <!--</logger>-->
+
+    <!--<logger name="org.la.util" level="DEBUG" additivity="false">-->
+        <!--<appender-ref ref="MYLOGFILE" />-->
+    <!--</logger>-->
+
+
+    <!--<logger name="org.springframework.web.client" level="DEBUG" additivity="false">-->
+    <!--<appender-ref ref="MYSTDOUT" />-->
+    <!--</logger>-->
+
+    <!--<logger name="org.springframework.http.client" level="DEBUG" additivity="false">-->
+    <!--<appender-ref ref="MYSTDOUT" />-->
+    <!--</logger>-->
+
+    <!-- Watch CAS client calls and server response detail -->
+    <!--<logger name="org.jasig.cas.client" level="TRACE" additivity="false">-->
+    <!--<appender-ref ref="R" />-->
+    <!--</logger>-->
+
+</configuration>
