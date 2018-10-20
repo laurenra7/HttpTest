@@ -4,6 +4,9 @@ import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import edu.byu.wso2.core.Wso2Credentials;
+import edu.byu.wso2.core.provider.ClientCredentialOauthTokenProvider;
+import edu.byu.wso2.core.provider.ClientCredentialsTokenHeaderProvider;
 import edu.byu.wso2.core.provider.TokenHeaderProvider;
 import org.la.RestTemplateLoggingInterceptor;
 import org.slf4j.Logger;
@@ -29,7 +32,11 @@ public class SpringRestTemplate implements HttpGet {
 
 
     @Override
-    public String httpGet(String url, boolean modeVerbose, TokenHeaderProvider tokenHeaderProvider) {
+    public String httpGet(String url,
+                          boolean modeVerbose,
+                          TokenHeaderProvider tokenHeaderProvider,
+                          String consumerKey,
+                          String consumerSecret) {
 
         if (modeVerbose) {
             System.out.println("Http GET from URL: " + url);
@@ -72,7 +79,14 @@ public class SpringRestTemplate implements HttpGet {
             log.debug("    query:\t" + uriComponents.getQuery());
         }
 
-        return httpGet(uriComponents.toUri(), modeVerbose, tokenHeaderProvider).getBody();
+//        Wso2Credentials wso2Credentials = new Wso2Credentials(consumerKey, consumerSecret);
+        ClientCredentialsTokenHeaderProvider tokenHeaderProviderA = new ClientCredentialsTokenHeaderProvider(
+                new ClientCredentialOauthTokenProvider(
+                        new Wso2Credentials(consumerKey, consumerSecret)
+                )
+        );
+
+        return httpGet(uriComponents.toUri(), modeVerbose, tokenHeaderProviderA).getBody();
 
     }
 

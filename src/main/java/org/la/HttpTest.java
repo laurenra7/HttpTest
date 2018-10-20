@@ -1,12 +1,12 @@
 package org.la;
 
 import java.io.BufferedWriter;
+import java.io.Console;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import edu.byu.wso2.core.Wso2Credentials;
 import edu.byu.wso2.core.provider.ClientCredentialsTokenHeaderProvider;
 import edu.byu.wso2.core.provider.TokenHeaderProvider;
 import org.apache.commons.cli.*;
@@ -62,14 +62,14 @@ public class HttpTest {
         springContext.scan("org.la.spring");
         springContext.refresh();
 
-        Wso2Credentials credentials = (Wso2Credentials) springContext.getBean("wso2Credentials");
-        System.out.println("client id: " + credentials.getClientId());
+//        Wso2Credentials credentials = (Wso2Credentials) springContext.getBean("wso2Credentials");
+//        System.out.println("client id: " + credentials.getClientId());
 
 //        System.out.println("wso2Credentials client id: " + wso2Credentials.getClientId());
 
-        for (String beanName : springContext.getBeanDefinitionNames()) {
-            System.out.println("registered bean: " + beanName);
-        }
+//        for (String beanName : springContext.getBeanDefinitionNames()) {
+//            System.out.println("registered bean: " + beanName);
+//        }
 
         TokenHeaderProvider tokenHeaderProvider = (TokenHeaderProvider) springContext.getBean("tokenHeaderProvider");
 
@@ -101,6 +101,9 @@ public class HttpTest {
                 .longOpt("verbose")
                 .desc("show request/response details and processing messages")
                 .build());
+        clOptions.addOption(Option.builder("w")
+                .desc("use WSO2 key (prompts for consumer key and secret)")
+                .build());
 
         if(args.length == 0) {
             showCommandHelp(clOptions);
@@ -120,6 +123,8 @@ public class HttpTest {
         boolean modeVerbose = false;
         String url = "";
         String httpMethod = "";
+        String consumerKey = "";
+        String consumerSecret = "";
 
         CommandLineParser clParser = new DefaultParser();
 
@@ -133,6 +138,25 @@ public class HttpTest {
             else {
                 if (commandLine.hasOption("verbose")) {
                     modeVerbose = true;
+                }
+
+                if (commandLine.hasOption("w")) {
+                    // Get a console to run from the command line.
+                    Console console = System.console();
+                    if (console == null) {
+                        System.err.println("No console");
+                        System.exit(1);
+                    }
+                    else {
+                        // Get consumer id
+                        char[] enterKey = console.readPassword("Consumer key: ");
+                        consumerKey = new String(enterKey);
+
+                        // Get consumer secret
+                        char[] enterSecret = console.readPassword("Consumer secret: ");
+                        consumerSecret = new String(enterSecret);
+                    }
+
                 }
 
                 // Remaining command line parameters, if any, are HTTP Method (GET, POST, etc.) and URL
@@ -177,7 +201,7 @@ public class HttpTest {
 
                         switch (httpMethod) {
                             case "GET":
-                                optionGet(springContext, commandLine, url, modeVerbose);
+                                optionGet(springContext, commandLine, url, modeVerbose, consumerKey, consumerSecret);
                                 break;
                             default:
                                 System.err.println("Invalid HTTP method. Only GET is valid so far. Sorry.");
@@ -201,7 +225,12 @@ public class HttpTest {
     }
 
 
-    private static void optionGet(AnnotationConfigApplicationContext springContext, CommandLine commandLine, String url, boolean modeVerbose) {
+    private static void optionGet(AnnotationConfigApplicationContext springContext,
+                                  CommandLine commandLine,
+                                  String url,
+                                  boolean modeVerbose,
+                                  String consumerKey,
+                                  String consumerSecret) {
         String outputFilename = null;
 
         if (commandLine.hasOption("output")) {
@@ -230,7 +259,7 @@ public class HttpTest {
                         System.out.println("Using " + HttpLib.SpringRestTemplateClass + " for HTTP processing.");
                         log.debug("Using " + HttpLib.SpringRestTemplateClass + " for HTTP processing.");
                     }
-                    doGetSpringRestTemplate(springContext, url, outputFilename, modeVerbose);
+                    doGetSpringRestTemplate(springContext, url, outputFilename, modeVerbose, consumerKey, consumerSecret);
                     break;
             }
         }
@@ -240,7 +269,7 @@ public class HttpTest {
                 System.out.println("Using " + HttpLib.SpringRestTemplateClass + " for HTTP processing.");
                 log.debug("Using " + HttpLib.SpringRestTemplateClass + " for HTTP processing.");
             }
-            doGetSpringRestTemplate(springContext, url, outputFilename, modeVerbose);
+            doGetSpringRestTemplate(springContext, url, outputFilename, modeVerbose, consumerKey, consumerSecret);
         }
 
 //        Jersey1RestTest.testRest();
@@ -276,10 +305,15 @@ public class HttpTest {
     }
 
 
-    private static void doGetSpringRestTemplate(AnnotationConfigApplicationContext springContext, String url, String outputFilename, boolean modeVerbose) {
+    private static void doGetSpringRestTemplate(AnnotationConfigApplicationContext springContext,
+                                                String url,
+                                                String outputFilename,
+                                                boolean modeVerbose,
+                                                String consumerKey,
+                                                String consumerSecret) {
         ClientCredentialsTokenHeaderProvider tokenHeaderProvider = (ClientCredentialsTokenHeaderProvider) springContext.getBean("tokenHeaderProvider");
         SpringRestTemplate httpClient = new SpringRestTemplate();
-        String response = httpClient.httpGet(url, modeVerbose, tokenHeaderProvider);
+        String response = httpClient.httpGet(url, modeVerbose, tokenHeaderProvider, consumerKey, consumerSecret);
         if (response != null && response.length() > 0) {
             if (outputFilename != null && outputFilename.length() > 0) {
                 writeStringToFile(response, outputFilename, modeVerbose);
