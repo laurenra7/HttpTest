@@ -1,4 +1,4 @@
-package org.la.util;
+package org.la;
 
 import java.io.BufferedReader;
 import java.io.IOException;

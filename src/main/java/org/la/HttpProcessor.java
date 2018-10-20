@@ -1,4 +1,4 @@
-package org.la.util;
+package org.la;
 
 /**
  * Created by laurenra on 5/12/17.

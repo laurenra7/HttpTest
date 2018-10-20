@@ -1,4 +1,4 @@
-package org.la.util;
+package org.la;
 
 import java.io.BufferedWriter;
 import java.io.FileWriter;
@@ -6,14 +6,21 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import edu.byu.wso2.core.Wso2Credentials;
+import edu.byu.wso2.core.provider.ClientCredentialsTokenHeaderProvider;
+import edu.byu.wso2.core.provider.TokenHeaderProvider;
 import org.apache.commons.cli.*;
+import org.la.http.SpringRestTemplate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.context.annotation.AnnotationConfigApplicationContext;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
 
 /**
  * Created by laurenra on 5/12/17.
  */
+@Configuration
 public class HttpTest {
 
     private static final Logger log = LoggerFactory.getLogger(HttpTest.class);
@@ -43,6 +50,28 @@ public class HttpTest {
     public static void main(String[] args) {
 
         int exitStatus = 0;
+//
+//        /* Spring configuration method 1, for single config file */
+//        AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext(Wso2Config.class);
+//
+        /* Spring configuration method 2, for multiple config files */
+        AnnotationConfigApplicationContext springContext = new AnnotationConfigApplicationContext();
+
+//        springContext.register(Wso2Config.class);
+//        ctx.register(SpringRestTemplate.class);
+        springContext.scan("org.la.spring");
+        springContext.refresh();
+
+        Wso2Credentials credentials = (Wso2Credentials) springContext.getBean("wso2Credentials");
+        System.out.println("client id: " + credentials.getClientId());
+
+//        System.out.println("wso2Credentials client id: " + wso2Credentials.getClientId());
+
+        for (String beanName : springContext.getBeanDefinitionNames()) {
+            System.out.println("registered bean: " + beanName);
+        }
+
+        TokenHeaderProvider tokenHeaderProvider = (TokenHeaderProvider) springContext.getBean("tokenHeaderProvider");
 
         // Build command line options
         Options clOptions = new Options();
@@ -77,7 +106,7 @@ public class HttpTest {
             showCommandHelp(clOptions);
         }
         else {
-            exitStatus = processCommandLine(args, clOptions);
+            exitStatus = processCommandLine(springContext, args, clOptions);
         }
 
         System.exit(exitStatus);
@@ -85,7 +114,7 @@ public class HttpTest {
     }
 
 
-    private static int processCommandLine(String[] args, Options clOptions) {
+    private static int processCommandLine(AnnotationConfigApplicationContext springContext, String[] args, Options clOptions) {
 
         int executeStatus = 0;
         boolean modeVerbose = false;
@@ -148,7 +177,7 @@ public class HttpTest {
 
                         switch (httpMethod) {
                             case "GET":
-                                optionGet(commandLine, url, modeVerbose);
+                                optionGet(springContext, commandLine, url, modeVerbose);
                                 break;
                             default:
                                 System.err.println("Invalid HTTP method. Only GET is valid so far. Sorry.");
@@ -172,7 +201,7 @@ public class HttpTest {
     }
 
 
-    private static void optionGet(CommandLine commandLine, String url, boolean modeVerbose) {
+    private static void optionGet(AnnotationConfigApplicationContext springContext, CommandLine commandLine, String url, boolean modeVerbose) {
         String outputFilename = null;
 
         if (commandLine.hasOption("output")) {
@@ -201,7 +230,7 @@ public class HttpTest {
                         System.out.println("Using " + HttpLib.SpringRestTemplateClass + " for HTTP processing.");
                         log.debug("Using " + HttpLib.SpringRestTemplateClass + " for HTTP processing.");
                     }
-                    doGetSpringRestTemplate(url, outputFilename, modeVerbose);
+                    doGetSpringRestTemplate(springContext, url, outputFilename, modeVerbose);
                     break;
             }
         }
@@ -211,7 +240,7 @@ public class HttpTest {
                 System.out.println("Using " + HttpLib.SpringRestTemplateClass + " for HTTP processing.");
                 log.debug("Using " + HttpLib.SpringRestTemplateClass + " for HTTP processing.");
             }
-            doGetSpringRestTemplate(url, outputFilename, modeVerbose);
+            doGetSpringRestTemplate(springContext, url, outputFilename, modeVerbose);
         }
 
 //        Jersey1RestTest.testRest();
@@ -247,9 +276,10 @@ public class HttpTest {
     }
 
 
-    private static void doGetSpringRestTemplate(String url, String outputFilename, boolean modeVerbose) {
+    private static void doGetSpringRestTemplate(AnnotationConfigApplicationContext springContext, String url, String outputFilename, boolean modeVerbose) {
+        ClientCredentialsTokenHeaderProvider tokenHeaderProvider = (ClientCredentialsTokenHeaderProvider) springContext.getBean("tokenHeaderProvider");
         SpringRestTemplate httpClient = new SpringRestTemplate();
-        String response = httpClient.httpGet(url, modeVerbose);
+        String response = httpClient.httpGet(url, modeVerbose, tokenHeaderProvider);
         if (response != null && response.length() > 0) {
             if (outputFilename != null && outputFilename.length() > 0) {
                 writeStringToFile(response, outputFilename, modeVerbose);

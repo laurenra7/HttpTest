@@ -10,6 +10,19 @@
 
     <dependencies>
 
+        <!--<dependency>-->
+            <!--<groupId>edu.byu.wso2</groupId>-->
+            <!--<artifactId>core</artifactId>-->
+            <!--<version>1.1</version>-->
+        <!--</dependency>-->
+
+        <!-- BYU WSO2 library (adds "core" artifact automatically) -->
+        <dependency>
+            <groupId>edu.byu.wso2</groupId>
+            <artifactId>filter-spring-rest-template</artifactId>
+            <version>1.1</version>
+        </dependency>
+
         <!-- Command line options parser -->
         <dependency>
             <groupId>commons-cli</groupId>
@@ -112,7 +125,7 @@
                     <appendAssemblyId>false</appendAssemblyId>
                     <archive>
                         <manifest>
-                            <mainClass>org.la.util.HttpTest</mainClass>
+                            <mainClass>org.la.HttpTest</mainClass>
                         </manifest>
                     </archive>
                 </configuration>

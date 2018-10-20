@@ -1,4 +1,4 @@
-package org.la.util;
+package org.la;
 
 import java.net.URI;
 

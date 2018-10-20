@@ -1,23 +1,35 @@
-package org.la.util;
+package org.la.http;
 
 import java.net.URI;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
-
+import edu.byu.wso2.core.provider.TokenHeaderProvider;
+import org.la.RestTemplateLoggingInterceptor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.http.ResponseEntity;
+import org.springframework.context.annotation.AnnotationConfigApplicationContext;
+import org.springframework.http.*;
 import org.springframework.http.client.ClientHttpRequestInterceptor;
+import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
 
-public class SpringRestTemplate {
+@Component
+public class SpringRestTemplate implements HttpGet {
 
     private static final Logger log = LoggerFactory.getLogger(SpringRestTemplate.class);
 
-    public String httpGet(String url, boolean modeVerbose) {
+//    @Autowired
+//    public TokenHeaderProvider tokenHeaderProvider;
+    private AnnotationConfigApplicationContext springContext;
+
+
+
+    @Override
+    public String httpGet(String url, boolean modeVerbose, TokenHeaderProvider tokenHeaderProvider) {
 
         if (modeVerbose) {
             System.out.println("Http GET from URL: " + url);
@@ -60,15 +72,24 @@ public class SpringRestTemplate {
             log.debug("    query:\t" + uriComponents.getQuery());
         }
 
-        return httpGet(uriComponents.toUri(), modeVerbose).getBody();
+        return httpGet(uriComponents.toUri(), modeVerbose, tokenHeaderProvider).getBody();
+
     }
 
 
-    private ResponseEntity<String> httpGet(URI uri, boolean modeVerbose) {
+    private ResponseEntity<String> httpGet(URI uri, boolean modeVerbose, TokenHeaderProvider tokenHeaderProvider) {
 
         ResponseEntity<String> response = null;
 
         RestTemplate httpService = new RestTemplate();
+
+        /* Set authorization header */
+        HttpHeaders headers = new HttpHeaders();
+        System.out.println("Request header -> Authorization: " + tokenHeaderProvider.getTokenHeaderValue());
+        headers.setAccept(Collections.singletonList(MediaType.APPLICATION_JSON));
+        headers.set("Authorization", tokenHeaderProvider.getTokenHeaderValue());
+
+        HttpEntity<String> httpEntity = new HttpEntity<>("parameters", headers);
 
         if (modeVerbose) {
             /* Set up logging of HTTP request and response to console */
@@ -81,7 +102,9 @@ public class SpringRestTemplate {
 //        HttpEntity<String> httpEntity = new HttpEntity<>(httpHeaders);
 
         try {
-            response = httpService.getForEntity(uri, String.class);
+//            response = httpService.getForEntity(uri, String.class);
+            response = httpService.exchange(uri, HttpMethod.GET, httpEntity, String.class);
+
         }
         catch (RestClientException e) {
             e.printStackTrace();
