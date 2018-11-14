@@ -12,7 +12,11 @@ import org.la.RestTemplateLoggingInterceptor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
-import org.springframework.http.*;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.ClientHttpRequestInterceptor;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClientException;
@@ -102,6 +106,7 @@ public class SpringRestTemplate implements HttpGet {
         System.out.println("Request header -> Authorization: " + tokenHeaderProvider.getTokenHeaderValue());
         headers.setAccept(Collections.singletonList(MediaType.APPLICATION_JSON));
         headers.set("Authorization", tokenHeaderProvider.getTokenHeaderValue());
+//        headers.set("Acting-For", "someone");
 
         HttpEntity<String> httpEntity = new HttpEntity<>("parameters", headers);
 

@@ -10,6 +10,8 @@ import java.util.List;
 import edu.byu.wso2.core.provider.ClientCredentialsTokenHeaderProvider;
 import edu.byu.wso2.core.provider.TokenHeaderProvider;
 import org.apache.commons.cli.*;
+import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.status.StatusLogger;
 import org.la.http.SpringRestTemplate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,6 +24,18 @@ import org.springframework.http.HttpMethod;
  */
 @Configuration
 public class HttpTest {
+
+    /**
+     * Log4j got included with the BYU WSO2 dependency so set its log level off
+     * so we don't see this meaningless error:
+     *
+     * ERROR StatusLogger No log4j2 configuration file found. Using default configuration
+     *
+     * Friends don't let friends use Log4j anymore. Use Logback instead.
+     */
+    static {
+        StatusLogger.getLogger().setLevel(Level.OFF);
+    }
 
     private static final Logger log = LoggerFactory.getLogger(HttpTest.class);
 
@@ -50,6 +64,8 @@ public class HttpTest {
     public static void main(String[] args) {
 
         int exitStatus = 0;
+
+
 //
 //        /* Spring configuration method 1, for single config file */
 //        AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext(Wso2Config.class);
@@ -85,6 +101,13 @@ public class HttpTest {
             libs = libs + "\n\t" + lib;
         }
 
+        clOptions.addOption(Option.builder("a")
+                .longOpt("add-header")
+                .desc("Add header:" + libs)
+                .numberOfArgs(2)
+                .valueSeparator()
+                .argName("header")
+                .build());
         clOptions.addOption(Option.builder("l")
                 .longOpt("library")
                 .desc("JAVA library to use (default: SpringRestTemplate):" + libs)
@@ -157,6 +180,14 @@ public class HttpTest {
                         consumerSecret = new String(enterSecret);
                     }
 
+                }
+
+                if (commandLine.hasOption("add-header")) {
+                    System.out.println("Add Header values:\n");
+                    String[] headers = commandLine.getOptionValues("add-header");
+                    for (String header: headers) {
+                        System.out.println("\t" + header);
+                    }
                 }
 
                 // Remaining command line parameters, if any, are HTTP Method (GET, POST, etc.) and URL
