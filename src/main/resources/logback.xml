@@ -79,6 +79,10 @@
     | Turn up logging for specific package
     +-->
 
+    <logger name="org.la" level="DEBUG" additivity="false">
+        <appender-ref ref="MYLOGFILE" />
+    </logger>
+
     <!-- Apache Commons HttpClient, uses Apache (Jakarta) Commons Logging (jcl-over-slf4j) -->
     <logger name="org.apache.commons.httpclient" level="DEBUG" additivity="false">
         <appender-ref ref="MYLOGFILE" />

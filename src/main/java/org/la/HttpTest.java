@@ -4,20 +4,20 @@ import java.io.BufferedWriter;
 import java.io.Console;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import edu.byu.wso2.core.provider.ClientCredentialsTokenHeaderProvider;
-import edu.byu.wso2.core.provider.TokenHeaderProvider;
-import org.apache.commons.cli.*;
+import org.apache.commons.cli.CommandLine;
+import org.apache.commons.cli.CommandLineParser;
+import org.apache.commons.cli.DefaultParser;
+import org.apache.commons.cli.HelpFormatter;
+import org.apache.commons.cli.Option;
+import org.apache.commons.cli.Options;
+import org.apache.commons.cli.ParseException;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.status.StatusLogger;
+import org.la.http.HttpRest;
 import org.la.http.SpringRestTemplate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.http.HttpMethod;
 
 /**
  * Created by laurenra on 5/12/17.
@@ -48,91 +48,114 @@ public class HttpTest {
         public static final String HttpComponentsHttpClientClass = "org.apache.http.client.HttpClient";
         public static final String SpringRestTemplateClass = "org.springframework.web.client.RestTemplate";
 
-        public static String[] list() {
-            String[] list = {CommonsHttpClient, HttpComponentsHttpClient, SpringRestTemplate};
-            return list;
+//        public static String[] list() {
+//            String[] list = {CommonsHttpClient, HttpComponentsHttpClient, SpringRestTemplate};
+//            return list;
+//        }
+
+        public static String helpList() {
+            String libs = "\n-" + CommonsHttpClient + "\n" +
+                    "-" + HttpComponentsHttpClient + "\n" +
+                    "-" + SpringRestTemplate;
+            return libs;
         }
 
-        public static void showPrettyList() {
-            System.out.println("  " + CommonsHttpClient + "\t\t" + CommonsHttpClientClass);
-            System.out.println("  " + HttpComponentsHttpClient + "\t" + HttpComponentsHttpClientClass);
-            System.out.println("  " + SpringRestTemplate + "\t\t" + SpringRestTemplateClass);
+        public static String prettyList() {
+            String prettyList =
+                    "  " + "Library                     Class\n" +
+//                    "  " + "HttpComponentsHttpClient" + "\t\t" + "org.springframework.web.client.RestTemplate" +
+                    "  " + "------------------------    -------------------------------------------\n" +
+//                    "  " + "________________________    ___________________________________________\n" +
+                    "  " + CommonsHttpClient + "           " + CommonsHttpClientClass + "\n" +
+                    "  " + HttpComponentsHttpClient + "    " + HttpComponentsHttpClientClass + "\n" +
+                    "  " + SpringRestTemplate + "          " + SpringRestTemplateClass;
+            return prettyList;
         }
     }
 
 
+    /**
+     * Program entry point
+     * @param args
+     */
     public static void main(String[] args) {
 
         int exitStatus = 0;
-
-
 //
 //        /* Spring configuration method 1, for single config file */
 //        AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext(Wso2Config.class);
 //
-        /* Spring configuration method 2, for multiple config files */
-        AnnotationConfigApplicationContext springContext = new AnnotationConfigApplicationContext();
+//        /* Spring configuration method 2, for multiple config files */
+//        AnnotationConfigApplicationContext springContext = new AnnotationConfigApplicationContext();
+//
+////        springContext.register(Wso2Config.class);
+////        ctx.register(SpringRestTemplate.class);
+//        springContext.scan("org.la.spring");
+//        springContext.refresh();
 
-//        springContext.register(Wso2Config.class);
-//        ctx.register(SpringRestTemplate.class);
-        springContext.scan("org.la.spring");
-        springContext.refresh();
-
-//        Wso2Credentials credentials = (Wso2Credentials) springContext.getBean("wso2Credentials");
-//        System.out.println("client id: " + credentials.getClientId());
-
-//        System.out.println("wso2Credentials client id: " + wso2Credentials.getClientId());
-
-//        for (String beanName : springContext.getBeanDefinitionNames()) {
-//            System.out.println("registered bean: " + beanName);
-//        }
-
-        TokenHeaderProvider tokenHeaderProvider = (TokenHeaderProvider) springContext.getBean("tokenHeaderProvider");
 
         // Build command line options
         Options clOptions = new Options();
+
+        clOptions.addOption(Option.builder("a")
+                .longOpt("add-header")
+                .desc("Add header(s)")
+                .numberOfArgs(2)
+                .valueSeparator()
+                .argName("header")
+                .build());
+
         clOptions.addOption(Option.builder("h")
                 .longOpt("help")
                 .desc("Show this help")
                 .build());
 
-        String libs = "";
-        for (String lib : HttpLib.list()) {
-            libs = libs + "\n\t" + lib;
-        }
-
-        clOptions.addOption(Option.builder("a")
-                .longOpt("add-header")
-                .desc("Add header:" + libs)
-                .numberOfArgs(2)
-                .valueSeparator()
-                .argName("header")
+        clOptions.addOption(Option.builder("k")
+                .longOpt("key")
+                .desc("Use WSO2 consumer key (prompts for consumer secret)")
+                .hasArg()
+                .argName("key")
                 .build());
+
         clOptions.addOption(Option.builder("l")
                 .longOpt("library")
-                .desc("JAVA library to use (default: SpringRestTemplate):" + libs)
+                .desc("JAVA library to use (default is SpringRestTemplate):" + HttpLib.helpList())
                 .hasArg()
                 .argName("library")
                 .build());
+
+        clOptions.addOption(Option.builder("m")
+                .longOpt("method")
+                .desc("HTTP method GET, POST, PUT, DELETE (default is GET)")
+                .hasArg()
+                .argName("method")
+                .build());
+
         clOptions.addOption(Option.builder("o")
                 .longOpt("output")
-                .desc("output file")
+                .desc("Output file")
                 .hasArg()
                 .argName("filename")
                 .build());
+
+        clOptions.addOption(Option.builder("u")
+                .required()
+                .longOpt("url")
+                .desc("URL")
+                .hasArg()
+                .argName("url")
+                .build());
+
         clOptions.addOption(Option.builder("v")
                 .longOpt("verbose")
-                .desc("show request/response details and processing messages")
-                .build());
-        clOptions.addOption(Option.builder("w")
-                .desc("use WSO2 key (prompts for consumer key and secret)")
+                .desc("Show request/response details and processing messages")
                 .build());
 
         if(args.length == 0) {
-            showCommandHelp(clOptions);
+            showDetailedHelp(clOptions);
         }
         else {
-            exitStatus = processCommandLine(springContext, args, clOptions);
+            exitStatus = processCommandLine(args, clOptions);
         }
 
         System.exit(exitStatus);
@@ -140,48 +163,94 @@ public class HttpTest {
     }
 
 
-    private static int processCommandLine(AnnotationConfigApplicationContext springContext, String[] args, Options clOptions) {
+    /**
+     * processCommandLine
+     * @param args
+     * @param clOptions
+     * @return
+     */
+    private static int processCommandLine(String[] args, Options clOptions) {
 
         int executeStatus = 0;
-        boolean modeVerbose = false;
-        String url = "";
-        String httpMethod = "";
-        String consumerKey = "";
-        String consumerSecret = "";
+        boolean verbose = false;
+        HttpRest httpRestService;
+        String httpResponse = "";
 
         CommandLineParser clParser = new DefaultParser();
-
 
         try {
             CommandLine commandLine = clParser.parse(clOptions, args);
 
             if (commandLine.hasOption("help")) {
-                showCommandHelp(clOptions);
+                showDetailedHelp(clOptions);
             }
             else {
+
                 if (commandLine.hasOption("verbose")) {
-                    modeVerbose = true;
+                    verbose = true;
                 }
 
-                if (commandLine.hasOption("w")) {
-                    // Get a console to run from the command line.
+                // Get HTTP library to use and instantiate it
+                if (commandLine.hasOption("library")) {
+                    // Use Java Http library specified
+                    switch (commandLine.getOptionValue("library")) {
+//                        case HttpLib.CommonsHttpClient:
+//                            if (verbose) {
+//                                System.out.println("Using " + HttpLib.CommonsHttpClientClass + " for HTTP processing.");
+//                                log.debug("Using " + HttpLib.CommonsHttpClientClass + " for HTTP processing.");
+//                            }
+//
+//                            doGetApacheCommons(url, outputFilename, verbose);
+//                            break;
+//                        case HttpLib.HttpComponentsHttpClient:
+//                            if (verbose) {
+//                                System.out.println("Using " + HttpLib.HttpComponentsHttpClientClass + " for HTTP processing.");
+//                                log.debug("Using " + HttpLib.HttpComponentsHttpClientClass + " for HTTP processing.");
+//                            }
+//                            doGetApacheHttpComponents(url, outputFilename, verbose);
+//                            break;
+                        default:
+                            if (verbose) {
+                                System.out.println("Using " + HttpLib.SpringRestTemplateClass + " for HTTP processing.");
+                                log.debug("Using " + HttpLib.SpringRestTemplateClass + " for HTTP processing.");
+                            }
+                            httpRestService = new SpringRestTemplate();
+                            break;
+                    }
+                }
+                else {
+                    // Otherwise default to Spring RestTemplate
+                    if (verbose) {
+                        System.out.println("Using " + HttpLib.SpringRestTemplateClass + " for HTTP processing.");
+                        log.debug("Using " + HttpLib.SpringRestTemplateClass + " for HTTP processing.");
+                    }
+                    httpRestService = new SpringRestTemplate();
+                }
+
+                // Set verbose (true/false) in the Http REST service object.
+                httpRestService.setVerbose(verbose);
+
+                // Get consumer key and secret.
+                if (commandLine.hasOption("key")) {
+                    // Get a console to run from the command line to prompt for secret.
                     Console console = System.console();
                     if (console == null) {
                         System.err.println("No console");
                         System.exit(1);
                     }
                     else {
-                        // Get consumer id
-                        char[] enterKey = console.readPassword("Consumer key: ");
-                        consumerKey = new String(enterKey);
+                        // Get consumer key (ID)
+                        httpRestService.setConsumerKey(commandLine.getOptionValue("key"));
 
-                        // Get consumer secret
+                        // Prompt for consumer secret
                         char[] enterSecret = console.readPassword("Consumer secret: ");
-                        consumerSecret = new String(enterSecret);
+                        httpRestService.setConsumerSecret(new String(enterSecret));
+                        System.out.println("input key:    " + httpRestService.getConsumerKey());
+                        System.out.println("input secret: " + httpRestService.getConsumerSecret());
                     }
-
                 }
 
+                // Get headers
                 if (commandLine.hasOption("add-header")) {
                     System.out.println("Add Header values:\n");
                     String[] headers = commandLine.getOptionValues("add-header");
@@ -190,121 +259,51 @@ public class HttpTest {
                     }
                 }
 
-                // Remaining command line parameters, if any, are HTTP Method (GET, POST, etc.) and URL
-                List<String> cmdLineUrl = commandLine.getArgList();
-                if(cmdLineUrl.size() > 0) {
-
-                    ArrayList<String> httpMethods = new ArrayList<String>(Arrays.asList(
-                            HttpMethod.GET.name(),
-                            HttpMethod.POST.name(),
-                            HttpMethod.PUT.name(),
-                            HttpMethod.DELETE.name()));
-
-                    // Single parameter should be URL, default to HTTP GET method
-                    if (cmdLineUrl.size() == 1) {
-                        if (httpMethods.contains(cmdLineUrl.get(0).toUpperCase())) {
-                            System.err.println("Error: no URL");
-                        }
-                        else {
-                            url = cmdLineUrl.get(0);
-                        }
-                    }
-                    // Two parameters (or more) should be URL and HTTP method
-                    else {
-                        if (httpMethods.contains(cmdLineUrl.get(0).toUpperCase())) {
-                            httpMethod = cmdLineUrl.get(0).toUpperCase(); // 1st arg is HTTP method
-                            url = cmdLineUrl.get(1); // Assume 2nd arg is URL
-                        }
-                        else if (httpMethods.contains(cmdLineUrl.get(1).toUpperCase())) {
-                            httpMethod = cmdLineUrl.get(1).toUpperCase(); // 2nd arg is HTTP method
-                            url = cmdLineUrl.get(0); // Assume 1st arg is URL
-                        }
-                        else {
-                            System.err.println("Invalid HTTP method.");
-                        }
-                    }
-
-                    if (url.length() > 0) {
-                        if (httpMethod.length() == 0) {
-                            // Default to GET if no HTTP methods on command line
-                            httpMethod = HttpMethod.GET.name();
-                        }
-
-                        switch (httpMethod) {
-                            case "GET":
-                                optionGet(springContext, commandLine, url, modeVerbose, consumerKey, consumerSecret);
-                                break;
-                            default:
-                                System.err.println("Invalid HTTP method. Only GET is valid so far. Sorry.");
-                                break;
-                        }
+                // Get HTTP method and make HTTP request.
+                if (commandLine.hasOption("method")) {
+                    switch(commandLine.getOptionValue("method").toUpperCase()) {
+                        case "GET":
+                            httpRestService.httpGet(commandLine.getOptionValue("url"));
+                            break;
+                        default:
+                            System.err.println("Invalid HTTP method. (Only GET is valid so far...sorry.)");
+                            break;
                     }
                 }
                 else {
-                    System.out.println("Error: no URL");
-                    showCommandHelp(clOptions);
+                    // Default to GET and make HTTP request.
+                    httpResponse = httpRestService.httpGet(commandLine.getOptionValue("url"));
+                }
+
+                // Display response.
+                System.out.println("---------- HTTP response body ----------");
+                System.out.println(httpResponse);
+
+                // Write response to file.
+                if (commandLine.hasOption("filename")) {
+                    System.out.println("Got filename: " + commandLine.getOptionValue("filename"));
+                    if (verbose) {
+                        System.out.println("Writing results to file " + commandLine.getOptionValue("filename"));
+                    }
+                    writeStringToFile(httpResponse, commandLine.getOptionValue("filename"));
+                }
+
+                if (commandLine.hasOption("output")) {
+                    System.out.println("Got output filename: " + commandLine.getOptionValue("output"));
+                    if (verbose) {
+                        System.out.println("Writing results to file " + commandLine.getOptionValue("output"));
+                    }
+                    writeStringToFile(httpResponse, commandLine.getOptionValue("output"));
                 }
             }
         }
         catch (ParseException e) {
             System.err.println("Command line parsing failed. Error: " + e.getMessage() + "\n");
-            showCommandHelp(clOptions);
+            showBriefHelp(clOptions);
             executeStatus = 1;
         }
 
         return executeStatus;
-    }
-
-
-    private static void optionGet(AnnotationConfigApplicationContext springContext,
-                                  CommandLine commandLine,
-                                  String url,
-                                  boolean modeVerbose,
-                                  String consumerKey,
-                                  String consumerSecret) {
-        String outputFilename = null;
-
-        if (commandLine.hasOption("output")) {
-            outputFilename = commandLine.getOptionValue("output");
-        }
-
-        if (commandLine.hasOption("library")) {
-            // Use Java Http library specified
-            switch (commandLine.getOptionValue("library")) {
-                case HttpLib.CommonsHttpClient:
-                    if (modeVerbose) {
-                        System.out.println("Using " + HttpLib.CommonsHttpClientClass + " for HTTP processing.");
-                        log.debug("Using " + HttpLib.CommonsHttpClientClass + " for HTTP processing.");
-                    }
-                    doGetApacheCommons(url, outputFilename, modeVerbose);
-                    break;
-                case HttpLib.HttpComponentsHttpClient:
-                    if (modeVerbose) {
-                        System.out.println("Using " + HttpLib.HttpComponentsHttpClientClass + " for HTTP processing.");
-                        log.debug("Using " + HttpLib.HttpComponentsHttpClientClass + " for HTTP processing.");
-                    }
-                    doGetApacheHttpComponents(url, outputFilename, modeVerbose);
-                    break;
-                default:
-                    if (modeVerbose) {
-                        System.out.println("Using " + HttpLib.SpringRestTemplateClass + " for HTTP processing.");
-                        log.debug("Using " + HttpLib.SpringRestTemplateClass + " for HTTP processing.");
-                    }
-                    doGetSpringRestTemplate(springContext, url, outputFilename, modeVerbose, consumerKey, consumerSecret);
-                    break;
-            }
-        }
-        else {
-            // Otherwise default to Spring RestTemplate
-            if (modeVerbose) {
-                System.out.println("Using " + HttpLib.SpringRestTemplateClass + " for HTTP processing.");
-                log.debug("Using " + HttpLib.SpringRestTemplateClass + " for HTTP processing.");
-            }
-            doGetSpringRestTemplate(springContext, url, outputFilename, modeVerbose, consumerKey, consumerSecret);
-        }
-
-//        Jersey1RestTest.testRest();
-//        Jersey2RestTest.testRest();
     }
 
 
@@ -313,7 +312,8 @@ public class HttpTest {
         String response = httpClient.httpGet(url, modeVerbose);
         if (response != null && response.length() > 0) {
             if (outputFilename != null && outputFilename.length() > 0) {
-                writeStringToFile(response, outputFilename, modeVerbose);
+//                writeStringToFile(response, outputFilename, modeVerbose);
+                writeStringToFile(response, outputFilename);
             }
             else {
                 System.out.println(response);
@@ -327,7 +327,8 @@ public class HttpTest {
         String response = httpClient.httpGet(url, modeVerbose);
         if (response != null && response.length() > 0) {
             if (outputFilename != null && outputFilename.length() > 0) {
-                writeStringToFile(response, outputFilename, modeVerbose);
+//                writeStringToFile(response, outputFilename, modeVerbose);
+                writeStringToFile(response, outputFilename);
             }
             else {
                 System.out.println(response);
@@ -336,34 +337,10 @@ public class HttpTest {
     }
 
 
-    private static void doGetSpringRestTemplate(AnnotationConfigApplicationContext springContext,
-                                                String url,
-                                                String outputFilename,
-                                                boolean modeVerbose,
-                                                String consumerKey,
-                                                String consumerSecret) {
-        ClientCredentialsTokenHeaderProvider tokenHeaderProvider = (ClientCredentialsTokenHeaderProvider) springContext.getBean("tokenHeaderProvider");
-        SpringRestTemplate httpClient = new SpringRestTemplate();
-        String response = httpClient.httpGet(url, modeVerbose, tokenHeaderProvider, consumerKey, consumerSecret);
-        if (response != null && response.length() > 0) {
-            if (outputFilename != null && outputFilename.length() > 0) {
-                writeStringToFile(response, outputFilename, modeVerbose);
-            }
-            else {
-                System.out.println(response);
-            }
-        }
-    }
-
-
-    private static int writeStringToFile(String outputString, String outputFilename, boolean modeVerbose) {
+    private static int writeStringToFile(String outputString, String outputFilename) {
         int status = 0;
         BufferedWriter bufferedWriter = null;
         FileWriter fileWriter = null;
-
-        if (modeVerbose) {
-            System.out.println("Writing results to file " + outputFilename);
-        }
 
         try {
             fileWriter = new FileWriter(outputFilename);
@@ -394,22 +371,34 @@ public class HttpTest {
     }
 
 
-    private static void showCommandHelp(Options options) {
-        String commandHelpHeader = "\nTest making an HTTP request to a URL using different Java HTTP libraries.\n" +
-                "If no library is specified, SpringRestTemplate is used.\n\n";
+    private static void showBriefHelp(Options options) {
+        HelpFormatter helpFormatter = new HelpFormatter();
+        helpFormatter.printHelp(88,"java -jar httptest.jar", "\nOptions:\n\n", options, "", true);
+    }
+
+
+    private static void showDetailedHelp(Options options) {
+        String commandHelpHeader = "\nTest an HTTP REST request using common Java HTTP libraries.\n\n" +
+                "Options:\n\n";
 
         String commandHelpFooter = "\nExamples:\n\n" +
-                "  java -jar httptest.jar https://someurl.com/get/stuff\n\n" +
-                "  java -jar httptest.jar GET https://someurl.com/get/stuff\n\n" +
-                "  java -jar httptest.jar -o myfile.txt GET https://someurl.com/get/stuff\n\n";
+                "  java -jar httptest.jar -u https://byu.edu/clubs\n\n" +
+                "  java -jar httptest.jar -u https://byu.edu/clubs -m GET\n\n" +
+                "  java -jar httptest.jar -u https://byu.edu/clubs -l CommonsHttpClient\n\n" +
+                "  java -jar httptest.jar -u https://byu.edu/clubs -o myfile.txt -m GET\n\n" +
+                "  java -jar httptest.jar -u https://byu.edu/clubs -a Accept=text/html,application/xml\n\n" +
+                "  java -jar httptest.jar -u https://byu.edu/clubs -a Flavor=sweet -a Colors=red,green\n\n" +
+                "  java -jar httptest.jar -u https://byu.edu/clubs -k myConsumerKey -o results.json\n\n" +
+                "Notes:\n\n" +
+                "  If no HTTP method is specified, HTTP GET is used.\n" +
+                "  If no library is specified, SpringRestTemplate is used. The libraries are:\n\n" +
+                HttpLib.prettyList() + "\n\n" +
+                "The Apache Commons HttpClient was widely used until a few years ago but it\n" +
+                "has been deprecated and replaced by HttpComponents HttpClient.\n\n";
 
+        System.out.println("");
         HelpFormatter helpFormatter = new HelpFormatter();
-        helpFormatter.printHelp(88,"java -jar httptest.jar HttpMethod URL", commandHelpHeader, options, commandHelpFooter, true);
-        System.out.println("*If no HTTP method is specified, HTTP GET is used.");
-        System.out.println("*If no library is specified, SpringRestTemplate is used. The libraries are:\n");
-        HttpLib.showPrettyList();
-        System.out.println("\nThe Apache Commons HttpClient was widely used until a few years ago but\n" +
-        "has been deprecated and replaced by HttpComponents HttpClient.");
+        helpFormatter.printHelp(88,"java -jar httptest.jar", commandHelpHeader, options, commandHelpFooter, true);
     }
 
 }

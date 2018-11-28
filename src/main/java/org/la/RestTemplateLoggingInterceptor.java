@@ -93,12 +93,12 @@ public class RestTemplateLoggingInterceptor implements ClientHttpRequestIntercep
 
         logger.debug("headers:\n" + headersStr);
         logger.debug("body:\n" + getBodyAsString(body));
-        logger.debug("---------- HTTP request end ----------");
+        logger.debug("----------- HTTP request end -----------");
     }
 
 
     private void traceResponse(ClientHttpResponse httpResponse) throws IOException {
-        logger.debug("---------- HTTP response begin ----------");
+        logger.debug("--------- HTTP response begin ----------");
         logger.debug("status code:\t" + httpResponse.getStatusCode());
         logger.debug("status text:\t" + httpResponse.getStatusText());
 
@@ -115,7 +115,7 @@ public class RestTemplateLoggingInterceptor implements ClientHttpRequestIntercep
         logger.debug("body:\n" + httpResponse.getBody());
 //        logger.debug("body:\n" + getBodyAsString(httpResponse.getBody()));
 //        logger.debug("body:\n" + getBodyAsStringOrg(httpResponse.getBody()));
-        logger.debug("---------- HTTP response end ----------");
+        logger.debug("---------- HTTP response end -----------");
 
     }
 
