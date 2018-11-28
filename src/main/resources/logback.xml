@@ -79,19 +79,19 @@
     | Turn up logging for specific package
     +-->
 
-    <logger name="org.la" level="DEBUG" additivity="false">
-        <appender-ref ref="MYLOGFILE" />
-    </logger>
+    <!--<logger name="org.la" level="DEBUG" additivity="false">-->
+        <!--<appender-ref ref="MYLOGFILE" />-->
+    <!--</logger>-->
 
     <!-- Apache Commons HttpClient, uses Apache (Jakarta) Commons Logging (jcl-over-slf4j) -->
-    <logger name="org.apache.commons.httpclient" level="DEBUG" additivity="false">
-        <appender-ref ref="MYLOGFILE" />
-    </logger>
+    <!--<logger name="org.apache.commons.httpclient" level="DEBUG" additivity="false">-->
+        <!--<appender-ref ref="MYLOGFILE" />-->
+    <!--</logger>-->
 
     <!-- Apache Commons HttpClient, show raw headers and content -->
-    <logger name="httpclient.wire" level="DEBUG" additivity="false">
-        <appender-ref ref="MYLOGFILE" />
-    </logger>
+    <!--<logger name="httpclient.wire" level="DEBUG" additivity="false">-->
+        <!--<appender-ref ref="MYLOGFILE" />-->
+    <!--</logger>-->
 
     <!-- Uses SLF4J / Logback logging -->
     <!--<logger name="org.la.util" level="DEBUG" additivity="false">-->
@@ -114,9 +114,9 @@
         <!--<appender-ref ref="MYLOGFILE" />-->
     <!--</logger>-->
 
-    <!--<logger name="org.la.util" level="DEBUG" additivity="false">-->
-        <!--<appender-ref ref="MYLOGFILE" />-->
-    <!--</logger>-->
+    <logger name="org.la.util" level="DEBUG" additivity="false">
+        <appender-ref ref="MYLOGFILE" />
+    </logger>
 
 
     <!--<logger name="org.springframework.web.client" level="DEBUG" additivity="false">-->

@@ -2,6 +2,7 @@ package org.la.http;
 
 import java.util.HashMap;
 import java.util.Map;
+import org.junit.Ignore;
 import org.junit.Test;
 
 public class MockHttpRestTest {
@@ -15,6 +16,7 @@ public class MockHttpRestTest {
 //        System.out.println("secret: " + ((MockHttpRest) httpRest).getConsumerSecret());
 //    }
 
+    @Ignore
     @Test
     public void httpGet() {
         HttpRest httpRest = new MockHttpRest();
@@ -31,7 +33,7 @@ public class MockHttpRestTest {
             System.out.println("headers: <none>");
         }
 
-        for (Map.Entry<String, String[]> entry : ((MockHttpRest) httpRest).getHeaders().entrySet()) {
+        for (Map.Entry<String, String> entry : ((MockHttpRest) httpRest).getHeaders().entrySet()) {
             System.out.println("header key: " + entry.getKey());
         }
 
@@ -51,13 +53,14 @@ public class MockHttpRestTest {
         System.out.println("secret: " + ((MockHttpRest) httpRest).getConsumerSecret());
 
         System.out.println("headers: ");
-        for (Map.Entry<String, String[]> entry : ((MockHttpRest) httpRest).getHeaders().entrySet()) {
+        for (Map.Entry<String, String> entry : ((MockHttpRest) httpRest).getHeaders().entrySet()) {
 //            System.out.println("header key: " + entry.getKey());
-            String valueConcat = "";
-            for (String value : entry.getValue()) {
-                valueConcat = valueConcat + value + ", ";
-            }
-            System.out.println("    " + entry.getKey() + ": " + valueConcat.replaceAll(", $", ""));
+//            String valueConcat = "";
+//            for (String value : entry.getValue()) {
+//                valueConcat = valueConcat + value + ", ";
+//            }
+//            System.out.println("    " + entry.getKey() + ": " + valueConcat.replaceAll(", $", ""));
+            System.out.println("header " + entry.getKey() + ": " + entry.getValue());
         }
 
 

@@ -5,6 +5,7 @@ import edu.byu.wso2.core.provider.ClientCredentialOauthTokenProvider;
 import edu.byu.wso2.core.provider.ClientCredentialsTokenHeaderProvider;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.la.RestTemplateLoggingInterceptor;
@@ -29,9 +30,18 @@ public class SpringRestTemplate implements HttpRest {
     private static final Logger log = LoggerFactory.getLogger(SpringRestTemplate.class);
 
     private boolean verbose;
-    private Map<String, String[]> headers;
+    private Map<String, String> headers;
     private String consumerKey;
     private String consumerSecret;
+
+
+    /* Constructor initializes values to defaults */
+    public SpringRestTemplate() {
+        verbose = false;
+        headers = new HashMap<String, String>();
+        consumerKey = "";
+        consumerSecret = "";
+    }
 
 
     @Override
@@ -80,9 +90,16 @@ public class SpringRestTemplate implements HttpRest {
             log.debug("    query:\t" + uriComponents.getQuery());
         }
 
-        HttpHeaders headers = new HttpHeaders();
-//        headers.setAccept(Collections.singletonList(MediaType.APPLICATION_JSON));
-        headers.setAccept(Arrays.asList(MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON));
+        HttpHeaders httpHeaders = new HttpHeaders();
+//        httpHeaders.setAccept(Collections.singletonList(MediaType.APPLICATION_JSON));
+        httpHeaders.setAccept(Arrays.asList(MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON));
+
+        // Add headers from command line.
+        if (!headers.isEmpty()) {
+            for (Map.Entry<String, String> header : headers.entrySet()) {
+                httpHeaders.set(header.getKey(), header.getValue());
+            }
+        }
 
         if (consumerKey != null && !consumerKey.equals("") ) {
             /* Generate WSO2 authorization header from consumer key and secret. */
@@ -97,11 +114,11 @@ public class SpringRestTemplate implements HttpRest {
                 System.out.println("Request header -> Authorization: " + tokenHeaderProvider.getTokenHeaderValue());
                 log.debug("Request header -> Authorization: " + tokenHeaderProvider.getTokenHeaderValue());
             }
-            headers.set("Authorization", tokenHeaderProvider.getTokenHeaderValue());
-//        headers.set("Acting-For", "someone");
+            httpHeaders.set("Authorization", tokenHeaderProvider.getTokenHeaderValue());
+//        httpHeaders.set("Acting-For", "someone");
         }
 
-        HttpEntity<String> httpEntity = new HttpEntity<>("parameters", headers);
+        HttpEntity<String> httpEntity = new HttpEntity<>("parameters", httpHeaders);
 
         if (verbose) {
             /* Set up logging of HTTP request and response to console */
@@ -142,12 +159,11 @@ public class SpringRestTemplate implements HttpRest {
     }
 
     @Override
-    public Map<String, String[]> getHeaders() {
+    public Map<String, String> getHeaders() {
         return headers;
     }
 
-    @Override
-    public void setHeaders(Map<String, String[]> headers) {
+    public void setHeaders(Map<String, String> headers) {
         this.headers = headers;
     }
 

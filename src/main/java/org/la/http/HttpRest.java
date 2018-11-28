@@ -10,9 +10,9 @@ public interface HttpRest {
 
     public void setVerbose(boolean verbose);
 
-    public Map<String, String[]> getHeaders();
+    public Map<String, String> getHeaders();
 
-    public void setHeaders(Map<String, String[]> headers);
+    public void setHeaders(Map<String, String> headers);
 
     public String getConsumerKey();
 

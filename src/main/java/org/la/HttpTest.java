@@ -1,9 +1,16 @@
 package org.la;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonParser;
 import java.io.BufferedWriter;
 import java.io.Console;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.DefaultParser;
@@ -48,11 +55,6 @@ public class HttpTest {
         public static final String HttpComponentsHttpClientClass = "org.apache.http.client.HttpClient";
         public static final String SpringRestTemplateClass = "org.springframework.web.client.RestTemplate";
 
-//        public static String[] list() {
-//            String[] list = {CommonsHttpClient, HttpComponentsHttpClient, SpringRestTemplate};
-//            return list;
-//        }
-
         public static String helpList() {
             String libs = "\n-" + CommonsHttpClient + "\n" +
                     "-" + HttpComponentsHttpClient + "\n" +
@@ -73,6 +75,36 @@ public class HttpTest {
         }
     }
 
+    private static void showBriefHelp(Options options) {
+        HelpFormatter helpFormatter = new HelpFormatter();
+        helpFormatter.printHelp(88,"java -jar httptest.jar URL", "\nOptions:\n\n", options, "", true);
+    }
+
+    private static void showDetailedHelp(Options options) {
+        String commandHelpHeader = "\nTest an HTTP REST request using common Java HTTP libraries.\n\n" +
+                "Options:\n\n";
+
+        String commandHelpFooter = "\nExamples:\n\n" +
+                "  java -jar httptest.jar https://byu.edu/clubs\n\n" +
+                "  java -jar httptest.jar https://byu.edu/clubs -m GET\n\n" +
+                "  java -jar httptest.jar https://byu.edu/clubs -l CommonsHttpClient\n\n" +
+                "  java -jar httptest.jar https://byu.edu/clubs -o myfile.txt -m GET\n\n" +
+                "  java -jar httptest.jar https://byu.edu/clubs -a Accept=text/html,application/xml\n\n" +
+                "  java -jar httptest.jar https://byu.edu/clubs -a Flavor=sweet -a Colors=red,green\n\n" +
+                "  java -jar httptest.jar https://byu.edu/clubs -k myConsumerKey -o results.json\n\n" +
+                "Notes:\n\n" +
+                "  -Use commas to separate values in multi-valued header as shown in example.\n" +
+                "  -If no HTTP method is specified, HTTP GET is used.\n" +
+                "  -If no library is specified, SpringRestTemplate is used. The libraries are:\n\n" +
+                HttpLib.prettyList() + "\n\n" +
+                "  The Apache Commons HttpClient was widely used until a few years ago but it\n" +
+                "  has been deprecated and replaced by HttpComponents HttpClient.\n\n";
+
+        System.out.println("");
+        HelpFormatter helpFormatter = new HelpFormatter();
+        helpFormatter.printHelp(88,"java -jar httptest.jar URL", commandHelpHeader, options, commandHelpFooter, true);
+    }
+
 
     /**
      * Program entry point
@@ -81,7 +113,7 @@ public class HttpTest {
     public static void main(String[] args) {
 
         int exitStatus = 0;
-//
+
 //        /* Spring configuration method 1, for single config file */
 //        AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext(Wso2Config.class);
 //
@@ -93,13 +125,12 @@ public class HttpTest {
 //        springContext.scan("org.la.spring");
 //        springContext.refresh();
 
-
-        // Build command line options
+        /* Build command line options */
         Options clOptions = new Options();
 
         clOptions.addOption(Option.builder("a")
                 .longOpt("add-header")
-                .desc("Add header(s)")
+                .desc("Add header(s). Add multiple headers with additional -a. Use commas to separate multiple values in header. See examples.")
                 .numberOfArgs(2)
                 .valueSeparator()
                 .argName("header")
@@ -112,7 +143,7 @@ public class HttpTest {
 
         clOptions.addOption(Option.builder("k")
                 .longOpt("key")
-                .desc("Use WSO2 consumer key (prompts for consumer secret)")
+                .desc("Use Oauth/WSO2 consumer key (prompts for consumer secret)")
                 .hasArg()
                 .argName("key")
                 .build());
@@ -138,12 +169,14 @@ public class HttpTest {
                 .argName("filename")
                 .build());
 
-        clOptions.addOption(Option.builder("u")
-                .required()
-                .longOpt("url")
-                .desc("URL")
-                .hasArg()
-                .argName("url")
+        clOptions.addOption(Option.builder("p")
+                .longOpt("pretty")
+                .desc("Pretty-print JSON response")
+                .build());
+
+        clOptions.addOption(Option.builder("q")
+                .longOpt("quiet")
+                .desc("Don't display HTTP response body")
                 .build());
 
         clOptions.addOption(Option.builder("v")
@@ -159,12 +192,15 @@ public class HttpTest {
         }
 
         System.exit(exitStatus);
-
     }
 
 
     /**
      * processCommandLine
+     *
+     * Process the command line options, build the HTTP request and send it using the
+     * specified Java REST library.
+     *
      * @param args
      * @param clOptions
      * @return
@@ -174,7 +210,8 @@ public class HttpTest {
         int executeStatus = 0;
         boolean verbose = false;
         HttpRest httpRestService;
-        String httpResponse = "";
+        String url = "";
+        String httpResponseBody = "";
 
         CommandLineParser clParser = new DefaultParser();
 
@@ -190,9 +227,20 @@ public class HttpTest {
                     verbose = true;
                 }
 
-                // Get HTTP library to use and instantiate it
+                /* Remaining command line parameter (not associated with an option) is the URL */
+                List<String> cmdLineUrl = commandLine.getArgList();
+                if (cmdLineUrl.size() == 1) {
+                    url = cmdLineUrl.get(0);
+                }
+                else {
+                    System.err.println("Error: no URL provided");
+                    showBriefHelp(clOptions);
+                    executeStatus = 1;
+                    System.exit(1);
+                }
+
+                /* Get HTTP library to use and instantiate it */
                 if (commandLine.hasOption("library")) {
-                    // Use Java Http library specified
                     switch (commandLine.getOptionValue("library")) {
 //                        case HttpLib.CommonsHttpClient:
 //                            if (verbose) {
@@ -219,7 +267,7 @@ public class HttpTest {
                     }
                 }
                 else {
-                    // Otherwise default to Spring RestTemplate
+                    /* Otherwise default to Spring RestTemplate */
                     if (verbose) {
                         System.out.println("Using " + HttpLib.SpringRestTemplateClass + " for HTTP processing.");
                         log.debug("Using " + HttpLib.SpringRestTemplateClass + " for HTTP processing.");
@@ -227,43 +275,69 @@ public class HttpTest {
                     httpRestService = new SpringRestTemplate();
                 }
 
-                // Set verbose (true/false) in the Http REST service object.
+                /* Set verbose (true/false) in the HTTP REST service object */
                 httpRestService.setVerbose(verbose);
 
-                // Get consumer key and secret.
+                /* Get consumer key and secret. */
                 if (commandLine.hasOption("key")) {
-                    // Get a console to run from the command line to prompt for secret.
+                    /* Get a console to run from the command line to prompt for secret */
                     Console console = System.console();
                     if (console == null) {
                         System.err.println("No console");
+                        executeStatus = 1;
                         System.exit(1);
                     }
                     else {
-                        // Get consumer key (ID)
+                        /* Get consumer key (ID) */
                         httpRestService.setConsumerKey(commandLine.getOptionValue("key"));
 
-                        // Prompt for consumer secret
+                        /* Prompt for consumer secret */
                         char[] enterSecret = console.readPassword("Consumer secret: ");
                         httpRestService.setConsumerSecret(new String(enterSecret));
-                        System.out.println("input key:    " + httpRestService.getConsumerKey());
-                        System.out.println("input secret: " + httpRestService.getConsumerSecret());
                     }
                 }
 
-                // Get headers
+                /* Get headers and add them to the HTTP request */
                 if (commandLine.hasOption("add-header")) {
-                    System.out.println("Add Header values:\n");
                     String[] headers = commandLine.getOptionValues("add-header");
-                    for (String header: headers) {
-                        System.out.println("\t" + header);
+
+                    Map<String, String> headersMap = new HashMap<String, String>();
+                    /* Even-numbered strings in array are keys, odd-numbered are values */
+                    int i = 0;
+                    String headerKey = "";
+                    String headerValue = "";
+                    for (String element: headers) {
+                        if (i % 2 == 0) {
+                            /* even is header name (key) */
+                            headerKey = element;
+                        }
+                        else {
+                            /* odd is header value */
+                            headerValue = element;
+                            /* replace commas separating values with semicolons (for valid multi-value headers) */
+                            headersMap.put(headerKey, headerValue.replaceAll(",", ";"));
+                            headerKey = "";
+                            headerValue = "";
+                        }
+                        i++;
                     }
+
+                    /* Show headers entered from command line */
+                    if (verbose) {
+                        System.out.println("Headers to be added:");
+                        for (Map.Entry<String, String> entry : headersMap.entrySet()) {
+                            System.out.println("\t" + entry.getKey() + ": " + entry.getValue());
+                        }
+                    }
+
+                    httpRestService.setHeaders(headersMap);
                 }
 
-                // Get HTTP method and make HTTP request.
+                /* Get HTTP method and make HTTP request */
                 if (commandLine.hasOption("method")) {
                     switch(commandLine.getOptionValue("method").toUpperCase()) {
                         case "GET":
-                            httpRestService.httpGet(commandLine.getOptionValue("url"));
+                            httpRestService.httpGet(url);
                             break;
                         default:
                             System.err.println("Invalid HTTP method. (Only GET is valid so far...sorry.)");
@@ -271,29 +345,34 @@ public class HttpTest {
                     }
                 }
                 else {
-                    // Default to GET and make HTTP request.
-                    httpResponse = httpRestService.httpGet(commandLine.getOptionValue("url"));
+                    /* Default to GET and make HTTP request */
+                    httpResponseBody = httpRestService.httpGet(url);
                 }
 
-                // Display response.
-                System.out.println("---------- HTTP response body ----------");
-                System.out.println(httpResponse);
-
-                // Write response to file.
-                if (commandLine.hasOption("filename")) {
-                    System.out.println("Got filename: " + commandLine.getOptionValue("filename"));
+                /* Pretty-print JSON */
+                if (commandLine.hasOption("pretty")) {
+                    log.debug("pretty-printing JSON...");
                     if (verbose) {
-                        System.out.println("Writing results to file " + commandLine.getOptionValue("filename"));
+                        System.out.println("pretty-printing JSON...");
                     }
-                    writeStringToFile(httpResponse, commandLine.getOptionValue("filename"));
+
+                    Gson gson = new GsonBuilder().setPrettyPrinting().create();
+                    JsonParser jsonParser = new JsonParser();
+                    JsonElement jsonElement = jsonParser.parse(httpResponseBody);
+                    httpResponseBody = gson.toJson(jsonElement);
                 }
 
+                /* Show response body unless quiet mode */
+                if (!commandLine.hasOption("quiet")) {
+                    System.out.println(httpResponseBody);
+                }
+
+                /* Write response to file (regardless of quiet mode) */
                 if (commandLine.hasOption("output")) {
-                    System.out.println("Got output filename: " + commandLine.getOptionValue("output"));
                     if (verbose) {
                         System.out.println("Writing results to file " + commandLine.getOptionValue("output"));
                     }
-                    writeStringToFile(httpResponse, commandLine.getOptionValue("output"));
+                    writeStringToFile(httpResponseBody, commandLine.getOptionValue("output"));
                 }
             }
         }
@@ -312,7 +391,6 @@ public class HttpTest {
         String response = httpClient.httpGet(url, modeVerbose);
         if (response != null && response.length() > 0) {
             if (outputFilename != null && outputFilename.length() > 0) {
-//                writeStringToFile(response, outputFilename, modeVerbose);
                 writeStringToFile(response, outputFilename);
             }
             else {
@@ -327,7 +405,6 @@ public class HttpTest {
         String response = httpClient.httpGet(url, modeVerbose);
         if (response != null && response.length() > 0) {
             if (outputFilename != null && outputFilename.length() > 0) {
-//                writeStringToFile(response, outputFilename, modeVerbose);
                 writeStringToFile(response, outputFilename);
             }
             else {
@@ -368,37 +445,6 @@ public class HttpTest {
         }
 
         return status;
-    }
-
-
-    private static void showBriefHelp(Options options) {
-        HelpFormatter helpFormatter = new HelpFormatter();
-        helpFormatter.printHelp(88,"java -jar httptest.jar", "\nOptions:\n\n", options, "", true);
-    }
-
-
-    private static void showDetailedHelp(Options options) {
-        String commandHelpHeader = "\nTest an HTTP REST request using common Java HTTP libraries.\n\n" +
-                "Options:\n\n";
-
-        String commandHelpFooter = "\nExamples:\n\n" +
-                "  java -jar httptest.jar -u https://byu.edu/clubs\n\n" +
-                "  java -jar httptest.jar -u https://byu.edu/clubs -m GET\n\n" +
-                "  java -jar httptest.jar -u https://byu.edu/clubs -l CommonsHttpClient\n\n" +
-                "  java -jar httptest.jar -u https://byu.edu/clubs -o myfile.txt -m GET\n\n" +
-                "  java -jar httptest.jar -u https://byu.edu/clubs -a Accept=text/html,application/xml\n\n" +
-                "  java -jar httptest.jar -u https://byu.edu/clubs -a Flavor=sweet -a Colors=red,green\n\n" +
-                "  java -jar httptest.jar -u https://byu.edu/clubs -k myConsumerKey -o results.json\n\n" +
-                "Notes:\n\n" +
-                "  If no HTTP method is specified, HTTP GET is used.\n" +
-                "  If no library is specified, SpringRestTemplate is used. The libraries are:\n\n" +
-                HttpLib.prettyList() + "\n\n" +
-                "The Apache Commons HttpClient was widely used until a few years ago but it\n" +
-                "has been deprecated and replaced by HttpComponents HttpClient.\n\n";
-
-        System.out.println("");
-        HelpFormatter helpFormatter = new HelpFormatter();
-        helpFormatter.printHelp(88,"java -jar httptest.jar", commandHelpHeader, options, commandHelpFooter, true);
     }
 
 }
