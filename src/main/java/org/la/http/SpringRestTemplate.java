@@ -51,25 +51,34 @@ public class SpringRestTemplate implements HttpRest {
         UriComponents uriComponents;
         RestTemplate httpService = new RestTemplate();
 
+        log.debug("Http GET from URL: " + url);
         if (verbose) {
             System.out.println("Http GET from URL: " + url);
-            log.debug("Http GET from URL: " + url);
         }
 
         if(url.contains("%")) {
+            log.debug("URL appears to already by encoded, so don't encode it again.");
             if (verbose) {
                 System.out.println("URL appears to already by encoded, so don't encode it again.");
-                log.debug("URL appears to already by encoded, so don't encode it again.");
             }
             uriComponents = UriComponentsBuilder.fromHttpUrl(url).build(true);
         }
         else {
+            log.debug("URL is not encoded, so encode it.");
             if (verbose) {
                 System.out.println("URL is not encoded, so encode it.");
-                log.debug("URL is not encoded, so encode it.");
             }
             uriComponents = UriComponentsBuilder.fromHttpUrl(url).build(false);
         }
+
+        log.debug("Entered URL string:\t" + url);
+        log.debug("URI built from URL:\t" + uriComponents.toUriString());
+        log.debug("    host:\t" + uriComponents.getHost());
+        log.debug("    scheme:\t" + uriComponents.getScheme());
+        log.debug("    fragment:\t"  + uriComponents.getFragment());
+        log.debug("    path:\t" + uriComponents.getPath());
+        log.debug("    pathSegments:\t" + uriComponents.getPathSegments());
+        log.debug("    query:\t" + uriComponents.getQuery());
 
         if (verbose) {
             System.out.println("Entered URL string:\t" + url);
@@ -80,14 +89,6 @@ public class SpringRestTemplate implements HttpRest {
             System.out.println("    path:\t" + uriComponents.getPath());
             System.out.println("    pathSegments:\t" + uriComponents.getPathSegments());
             System.out.println("    query:\t" + uriComponents.getQuery());
-            log.debug("Entered URL string:\t" + url);
-            log.debug("URI built from URL:\t" + uriComponents.toUriString());
-            log.debug("    host:\t" + uriComponents.getHost());
-            log.debug("    scheme:\t" + uriComponents.getScheme());
-            log.debug("    fragment:\t"  + uriComponents.getFragment());
-            log.debug("    path:\t" + uriComponents.getPath());
-            log.debug("    pathSegments:\t" + uriComponents.getPathSegments());
-            log.debug("    query:\t" + uriComponents.getQuery());
         }
 
         HttpHeaders httpHeaders = new HttpHeaders();
@@ -110,9 +111,9 @@ public class SpringRestTemplate implements HttpRest {
             );
 
             /* Set authorization header. */
+            log.debug("Request header -> Authorization: " + tokenHeaderProvider.getTokenHeaderValue());
             if (verbose) {
                 System.out.println("Request header -> Authorization: " + tokenHeaderProvider.getTokenHeaderValue());
-                log.debug("Request header -> Authorization: " + tokenHeaderProvider.getTokenHeaderValue());
             }
             httpHeaders.set("Authorization", tokenHeaderProvider.getTokenHeaderValue());
 //        httpHeaders.set("Acting-For", "someone");
@@ -120,7 +121,7 @@ public class SpringRestTemplate implements HttpRest {
 
         HttpEntity<String> httpEntity = new HttpEntity<>("parameters", httpHeaders);
 
-        if (verbose) {
+        if (log.isDebugEnabled()) {
             /* Set up logging of HTTP request and response to console */
             List<ClientHttpRequestInterceptor> requestInterceptorList = new ArrayList<ClientHttpRequestInterceptor>();
             requestInterceptorList.add(new RestTemplateLoggingInterceptor());
@@ -139,9 +140,7 @@ public class SpringRestTemplate implements HttpRest {
             System.out.println(e);
         }
 
-        if (verbose) {
-            log.debug("response: {}", response.getBody());
-        }
+        log.debug("response: {}", response.getBody());
 
         return response.getBody();
 

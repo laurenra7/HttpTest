@@ -258,9 +258,9 @@ public class HttpTest {
 //                            doGetApacheHttpComponents(url, outputFilename, verbose);
 //                            break;
                         default:
+                            log.debug("Using " + HttpLib.SpringRestTemplateClass + " for HTTP processing.");
                             if (verbose) {
                                 System.out.println("Using " + HttpLib.SpringRestTemplateClass + " for HTTP processing.");
-                                log.debug("Using " + HttpLib.SpringRestTemplateClass + " for HTTP processing.");
                             }
                             httpRestService = new SpringRestTemplate();
                             break;
@@ -268,9 +268,9 @@ public class HttpTest {
                 }
                 else {
                     /* Otherwise default to Spring RestTemplate */
+                    log.debug("Using " + HttpLib.SpringRestTemplateClass + " for HTTP processing.");
                     if (verbose) {
                         System.out.println("Using " + HttpLib.SpringRestTemplateClass + " for HTTP processing.");
-                        log.debug("Using " + HttpLib.SpringRestTemplateClass + " for HTTP processing.");
                     }
                     httpRestService = new SpringRestTemplate();
                 }

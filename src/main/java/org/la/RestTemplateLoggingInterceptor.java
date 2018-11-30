@@ -1,5 +1,9 @@
 package org.la;
 
+import ch.qos.logback.classic.Level;
+import ch.qos.logback.classic.LoggerContext;
+import ch.qos.logback.classic.encoder.PatternLayoutEncoder;
+import ch.qos.logback.core.ConsoleAppender;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -7,12 +11,7 @@ import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
 import java.util.List;
 import java.util.Map;
-
-import ch.qos.logback.classic.Level;
-import ch.qos.logback.classic.Logger;
-import ch.qos.logback.classic.LoggerContext;
-import ch.qos.logback.classic.encoder.PatternLayoutEncoder;
-import ch.qos.logback.core.ConsoleAppender;
+import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpRequest;
 import org.springframework.http.client.ClientHttpRequestExecution;
@@ -24,11 +23,26 @@ import org.springframework.http.client.ClientHttpResponse;
  */
 public class RestTemplateLoggingInterceptor implements ClientHttpRequestInterceptor {
 
-//    private static final Logger log = LoggerFactory.getLogger(ClientHttpRequestInterceptor.class);
+    /* Log4j Logger, used with logback.xml */
+    private static final Logger logger = LoggerFactory.getLogger(ClientHttpRequestInterceptor.class);
 
-    private Logger logger;
 
-    public RestTemplateLoggingInterceptor() {
+    /* Logback Logger, used with configureLogging() method below */
+    private ch.qos.logback.classic.Logger lblogger;
+
+
+//    /* Configure Logback logging in constructor */
+//    public RestTemplateLoggingInterceptor() {
+//        /* Send LogBack output to specified LogBack logger file */
+//        configureLogging();
+//    }
+
+
+    /**
+     * Configure logging to specified file or console rather than using the
+     * settings in logback.xml.
+     */
+    private void configureLogging() {
         /* Send LogBack output to specified LogBack logger file */
         LoggerContext loggerContext = (LoggerContext) LoggerFactory.getILoggerFactory();
 
@@ -57,14 +71,15 @@ public class RestTemplateLoggingInterceptor implements ClientHttpRequestIntercep
 //        consoleAppender.setName("STDOUT");
         consoleAppender.start();
 
-        Logger slf4jLogger = (Logger) LoggerFactory.getLogger("org.springframework.http.client");
+        ch.qos.logback.classic.Logger slf4jLogger = (ch.qos.logback.classic.Logger) LoggerFactory.getLogger("org.springframework.http.client");
         slf4jLogger.addAppender(consoleAppender);
         slf4jLogger.setLevel(Level.DEBUG);
         slf4jLogger.setAdditive(false);
 
-        logger = slf4jLogger;
+        lblogger = slf4jLogger;
 
     }
+
 
     @Override
     public ClientHttpResponse intercept(HttpRequest httpRequest, byte[] body, ClientHttpRequestExecution requestExecution) throws IOException {

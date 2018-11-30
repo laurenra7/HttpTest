@@ -93,12 +93,6 @@
         <!--<appender-ref ref="MYLOGFILE" />-->
     <!--</logger>-->
 
-    <!-- Uses SLF4J / Logback logging -->
-    <!--<logger name="org.la.util" level="DEBUG" additivity="false">-->
-        <!--<appender-ref ref="MYLOGFILE" />-->
-        <!--<appender-ref ref="MYSTDOUT" />-->
-    <!--</logger>-->
-
     <!-- Uses java.util.logging (jul-to-slf4j)
 
         FINEST  -> TRACE
@@ -114,22 +108,26 @@
         <!--<appender-ref ref="MYLOGFILE" />-->
     <!--</logger>-->
 
-    <logger name="org.la.util" level="DEBUG" additivity="false">
-        <appender-ref ref="MYLOGFILE" />
-    </logger>
 
 
+    <!-- Debug Spring RestTemplate (pretty basic and almost useless) -->
     <!--<logger name="org.springframework.web.client" level="DEBUG" additivity="false">-->
-    <!--<appender-ref ref="MYSTDOUT" />-->
+        <!--<appender-ref ref="MYLOGFILE" />-->
     <!--</logger>-->
 
+    <!--
+        Debug Spring RestTemplate using custom org.springframework.http.client.ClientHttpRequestInterceptor
+        named RestTemplateLoggingInterceptor, which allows detailed access to HTTP request and response
+        (set level=DEBUG on org.la.http so org.la.http.SpringRestTemplate loads the custom Interceptor).
+      -->
     <!--<logger name="org.springframework.http.client" level="DEBUG" additivity="false">-->
-    <!--<appender-ref ref="MYSTDOUT" />-->
+        <!--<appender-ref ref="MYLOGFILE" />-->
     <!--</logger>-->
 
-    <!-- Watch CAS client calls and server response detail -->
-    <!--<logger name="org.jasig.cas.client" level="TRACE" additivity="false">-->
-    <!--<appender-ref ref="R" />-->
+    <!-- Debug SpringRestTemplate -->
+    <!--<logger name="org.la.http" level="DEBUG" additivity="false">-->
+        <!--<appender-ref ref="MYLOGFILE" />-->
     <!--</logger>-->
+
 
 </configuration>
