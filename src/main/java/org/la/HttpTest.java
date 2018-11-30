@@ -20,6 +20,7 @@ import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.status.StatusLogger;
+import org.la.http.ApacheHttpComponentsHttpClient;
 import org.la.http.HttpRest;
 import org.la.http.SpringRestTemplate;
 import org.slf4j.Logger;
@@ -250,13 +251,13 @@ public class HttpTest {
 //
 //                            doGetApacheCommons(url, outputFilename, verbose);
 //                            break;
-//                        case HttpLib.HttpComponentsHttpClient:
-//                            if (verbose) {
-//                                System.out.println("Using " + HttpLib.HttpComponentsHttpClientClass + " for HTTP processing.");
-//                                log.debug("Using " + HttpLib.HttpComponentsHttpClientClass + " for HTTP processing.");
-//                            }
-//                            doGetApacheHttpComponents(url, outputFilename, verbose);
-//                            break;
+                        case HttpLib.HttpComponentsHttpClient:
+                            if (verbose) {
+                                System.out.println("Using " + HttpLib.HttpComponentsHttpClientClass + " for HTTP processing.");
+                                log.debug("Using " + HttpLib.HttpComponentsHttpClientClass + " for HTTP processing.");
+                            }
+                            httpRestService = new ApacheHttpComponentsHttpClient();
+                            break;
                         default:
                             log.debug("Using " + HttpLib.SpringRestTemplateClass + " for HTTP processing.");
                             if (verbose) {
@@ -400,18 +401,18 @@ public class HttpTest {
     }
 
 
-    private static void doGetApacheHttpComponents(String url, String outputFilename, boolean modeVerbose) {
-        ApacheHttpComponentsHttpClient httpClient = new ApacheHttpComponentsHttpClient();
-        String response = httpClient.httpGet(url, modeVerbose);
-        if (response != null && response.length() > 0) {
-            if (outputFilename != null && outputFilename.length() > 0) {
-                writeStringToFile(response, outputFilename);
-            }
-            else {
-                System.out.println(response);
-            }
-        }
-    }
+//    private static void doGetApacheHttpComponents(String url, String outputFilename, boolean modeVerbose) {
+//        ApacheHttpComponentsHttpClient httpClient = new ApacheHttpComponentsHttpClient();
+//        String response = httpClient.httpGet(url, modeVerbose);
+//        if (response != null && response.length() > 0) {
+//            if (outputFilename != null && outputFilename.length() > 0) {
+//                writeStringToFile(response, outputFilename);
+//            }
+//            else {
+//                System.out.println(response);
+//            }
+//        }
+//    }
 
 
     private static int writeStringToFile(String outputString, String outputFilename) {

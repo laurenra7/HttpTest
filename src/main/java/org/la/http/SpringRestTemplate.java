@@ -95,7 +95,7 @@ public class SpringRestTemplate implements HttpRest {
 //        httpHeaders.setAccept(Collections.singletonList(MediaType.APPLICATION_JSON));
         httpHeaders.setAccept(Arrays.asList(MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON));
 
-        // Add headers from command line.
+        /* Add headers from command line */
         if (!headers.isEmpty()) {
             for (Map.Entry<String, String> header : headers.entrySet()) {
                 httpHeaders.set(header.getKey(), header.getValue());
@@ -116,7 +116,6 @@ public class SpringRestTemplate implements HttpRest {
                 System.out.println("Request header -> Authorization: " + tokenHeaderProvider.getTokenHeaderValue());
             }
             httpHeaders.set("Authorization", tokenHeaderProvider.getTokenHeaderValue());
-//        httpHeaders.set("Acting-For", "someone");
         }
 
         HttpEntity<String> httpEntity = new HttpEntity<>("parameters", httpHeaders);
