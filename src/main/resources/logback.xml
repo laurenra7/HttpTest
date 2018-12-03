@@ -110,10 +110,10 @@
 
 
 
-    <!-- Debug Spring RestTemplate (pretty basic and almost useless) -->
-    <!--<logger name="org.springframework.web.client" level="DEBUG" additivity="false">-->
-        <!--<appender-ref ref="MYLOGFILE" />-->
-    <!--</logger>-->
+    <!-- Debug SpringRestTemplate, ApacheHttpComponentsHttpClient -->
+    <logger name="org.la.http" level="DEBUG" additivity="false">
+        <appender-ref ref="MYLOGFILE" />
+    </logger>
 
     <!--
         Debug Spring RestTemplate using custom org.springframework.http.client.ClientHttpRequestInterceptor
@@ -124,10 +124,11 @@
         <!--<appender-ref ref="MYLOGFILE" />-->
     <!--</logger>-->
 
-    <!-- Debug SpringRestTemplate -->
-    <!--<logger name="org.la.http" level="DEBUG" additivity="false">-->
+    <!-- Debug Spring RestTemplate (pretty basic and almost useless) -->
+    <!--<logger name="org.springframework.web.client" level="DEBUG" additivity="false">-->
         <!--<appender-ref ref="MYLOGFILE" />-->
     <!--</logger>-->
+
 
 
 </configuration>

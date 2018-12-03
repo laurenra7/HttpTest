@@ -279,6 +279,15 @@ public class HttpTest {
                 /* Set verbose (true/false) in the HTTP REST service object */
                 httpRestService.setVerbose(verbose);
 
+                /* If quiet mode, override verbose, otherwise set v */
+                if (commandLine.hasOption("quiet")) {
+                    httpRestService.setVerbose(false);
+                }
+                else {
+                    httpRestService.setVerbose(verbose);
+                }
+
+
                 /* Get consumer key and secret. */
                 if (commandLine.hasOption("key")) {
                     /* Get a console to run from the command line to prompt for secret */

@@ -40,12 +40,16 @@ public class ApacheHttpComponentsHttpClient implements HttpRest {
 
     @Override
     public String httpGet(String url) {
-        String result = "";
+        String strOut = "";
+        StringBuffer responseBody = new StringBuffer();
 
-        log.debug("Http GET from URL: " + url);
-        if (verbose) {
-            System.out.println("Http GET from URL: " + url);
-        }
+        strOut = "----------------------- HTTP GET ------------------------";
+        log.debug(strOut);
+        if (verbose) System.out.println(strOut);
+
+        strOut = "URL: " + url;
+        log.debug(strOut);
+        if (verbose) System.out.println(strOut);
 
         HttpClient httpClient = HttpClientBuilder.create().build();
         HttpGet httpGet = new HttpGet(url);
@@ -71,10 +75,7 @@ public class ApacheHttpComponentsHttpClient implements HttpRest {
             );
 
             /* Set authorization header. */
-            log.debug("Request header -> Authorization: " + tokenHeaderProvider.getTokenHeaderValue());
-            if (verbose) {
-                System.out.println("Request header -> Authorization: " + tokenHeaderProvider.getTokenHeaderValue());
-            }
+            strOut = strOut + "Get Authorization token: " + tokenHeaderProvider.getTokenHeaderValue() + "\n";
             httpGet.addHeader("Authorization", tokenHeaderProvider.getTokenHeaderValue());
         }
 
@@ -83,29 +84,39 @@ public class ApacheHttpComponentsHttpClient implements HttpRest {
             HttpResponse httpResponse = httpClient.execute(httpGet);
             int responseCode = httpResponse.getStatusLine().getStatusCode();
 
-            if (verbose) {
-                System.out.println("HTTP response code: " + httpResponse.getStatusLine().getStatusCode());
+            strOut = "HTTP response code: " + httpResponse.getStatusLine().getStatusCode();
+            log.debug(strOut);
+            if (verbose) System.out.println(strOut);
+
+            strOut = "-------------------- Request Header ---------------------";
+            log.debug(strOut);
+            if (verbose) System.out.println(strOut);
+
+            org.apache.http.Header[] requestHeaders = httpGet.getAllHeaders();
+
+            for (org.apache.http.Header reqHeader : requestHeaders) {
+                strOut = reqHeader.getName() + ": " + reqHeader.getValue();
+                log.debug(strOut);
+                if (verbose) System.out.println(strOut);
             }
 
             if (responseCode == HttpStatus.SC_OK) {
-                if (verbose) {
-                    System.out.println("---------- Request Header ----------");
-                    org.apache.http.Header[] requestHeaders = httpGet.getAllHeaders();
-                    for (org.apache.http.Header reqHeader : requestHeaders) {
-                        System.out.println(reqHeader.getName() + ": " + reqHeader.getValue());
-                    }
 
-                    System.out.println("---------- Response Header ----------");
-                    org.apache.http.Header[] responseHeaders = httpResponse.getAllHeaders();
-                    for (org.apache.http.Header respHeader : responseHeaders) {
-                        System.out.println(respHeader.getName() + ": " + respHeader.getValue());
-                    }
+                strOut = "-------------------- Response Header --------------------";
+                log.debug(strOut);
+                if (verbose) System.out.println(strOut);
+
+                org.apache.http.Header[] responseHeaders = httpResponse.getAllHeaders();
+
+                for (org.apache.http.Header respHeader : responseHeaders) {
+                    strOut = respHeader.getName() + ": " + respHeader.getValue();
+                    log.debug(strOut);
+                    if (verbose) System.out.println(strOut);
                 }
 
                 try (BufferedReader bufferedReader =
                              new BufferedReader(new InputStreamReader(httpResponse.getEntity().getContent()))) {
 
-                    StringBuffer responseBody = new StringBuffer();
                     String line = "";
                     while ((line = bufferedReader.readLine()) != null) {
                         responseBody.append("\n");
@@ -114,11 +125,9 @@ public class ApacheHttpComponentsHttpClient implements HttpRest {
 
                     responseBody.deleteCharAt(0); // delete initial newline
 
-                    if (verbose) {
-                        System.out.println("---------- Response Body ----------");
-                    }
+                    strOut = "--------------------- Response Body ---------------------\n" + responseBody.toString();
+                    log.debug(strOut);
 
-                    result = result + responseBody;
                 }
 
             }
@@ -132,7 +141,13 @@ public class ApacheHttpComponentsHttpClient implements HttpRest {
             e.printStackTrace();
         }
 
-        return result;
+        /* Show debug statements. */
+//        log.debug(strOut);
+//        if (verbose) {
+//            System.out.println(strOut);
+//        }
+
+        return responseBody.toString();
     }
 
     @Override
