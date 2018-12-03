@@ -20,6 +20,7 @@ import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.status.StatusLogger;
+import org.la.http.ApacheCommonsHttpClient;
 import org.la.http.ApacheHttpComponentsHttpClient;
 import org.la.http.HttpRest;
 import org.la.http.SpringRestTemplate;
@@ -243,14 +244,14 @@ public class HttpTest {
                 /* Get HTTP library to use and instantiate it */
                 if (commandLine.hasOption("library")) {
                     switch (commandLine.getOptionValue("library")) {
-//                        case HttpLib.CommonsHttpClient:
-//                            if (verbose) {
-//                                System.out.println("Using " + HttpLib.CommonsHttpClientClass + " for HTTP processing.");
-//                                log.debug("Using " + HttpLib.CommonsHttpClientClass + " for HTTP processing.");
-//                            }
-//
-//                            doGetApacheCommons(url, outputFilename, verbose);
-//                            break;
+                        case HttpLib.CommonsHttpClient:
+                            if (verbose) {
+                                System.out.println("Using " + HttpLib.CommonsHttpClientClass + " for HTTP processing.");
+                                log.debug("Using " + HttpLib.CommonsHttpClientClass + " for HTTP processing.");
+                            }
+
+                            httpRestService = new ApacheCommonsHttpClient();
+                            break;
                         case HttpLib.HttpComponentsHttpClient:
                             if (verbose) {
                                 System.out.println("Using " + HttpLib.HttpComponentsHttpClientClass + " for HTTP processing.");
@@ -259,9 +260,9 @@ public class HttpTest {
                             httpRestService = new ApacheHttpComponentsHttpClient();
                             break;
                         default:
-                            log.debug("Using " + HttpLib.SpringRestTemplateClass + " for HTTP processing.");
+                            log.debug("Error: unrecognized library. Using " + HttpLib.SpringRestTemplateClass + " for HTTP processing.");
                             if (verbose) {
-                                System.out.println("Using " + HttpLib.SpringRestTemplateClass + " for HTTP processing.");
+                                System.out.println("Error: unrecognized library. Using " + HttpLib.SpringRestTemplateClass + " for HTTP processing.");
                             }
                             httpRestService = new SpringRestTemplate();
                             break;
@@ -396,18 +397,18 @@ public class HttpTest {
     }
 
 
-    private static void doGetApacheCommons(String url, String outputFilename, boolean modeVerbose) {
-        ApacheCommonsHttpClient httpClient = new ApacheCommonsHttpClient();
-        String response = httpClient.httpGet(url, modeVerbose);
-        if (response != null && response.length() > 0) {
-            if (outputFilename != null && outputFilename.length() > 0) {
-                writeStringToFile(response, outputFilename);
-            }
-            else {
-                System.out.println(response);
-            }
-        }
-    }
+//    private static void doGetApacheCommons(String url, String outputFilename, boolean modeVerbose) {
+//        ApacheCommonsHttpClient httpClient = new ApacheCommonsHttpClient();
+//        String response = httpClient.httpGet(url);
+//        if (response != null && response.length() > 0) {
+//            if (outputFilename != null && outputFilename.length() > 0) {
+//                writeStringToFile(response, outputFilename);
+//            }
+//            else {
+//                System.out.println(response);
+//            }
+//        }
+//    }
 
 
 //    private static void doGetApacheHttpComponents(String url, String outputFilename, boolean modeVerbose) {

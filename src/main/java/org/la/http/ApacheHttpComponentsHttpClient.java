@@ -84,7 +84,7 @@ public class ApacheHttpComponentsHttpClient implements HttpRest {
             HttpResponse httpResponse = httpClient.execute(httpGet);
             int responseCode = httpResponse.getStatusLine().getStatusCode();
 
-            strOut = "HTTP response code: " + httpResponse.getStatusLine().getStatusCode();
+            strOut = "HTTP response code: " + responseCode;
             log.debug(strOut);
             if (verbose) System.out.println(strOut);
 
