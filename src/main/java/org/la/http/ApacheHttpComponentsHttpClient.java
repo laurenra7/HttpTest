@@ -79,7 +79,7 @@ public class ApacheHttpComponentsHttpClient implements HttpRest {
             httpGet.addHeader("Authorization", tokenHeaderProvider.getTokenHeaderValue());
         }
 
-
+        /* Send request and get response */
         try {
             HttpResponse httpResponse = httpClient.execute(httpGet);
             int responseCode = httpResponse.getStatusLine().getStatusCode();

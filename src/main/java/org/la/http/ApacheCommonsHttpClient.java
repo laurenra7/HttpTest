@@ -1,5 +1,8 @@
 package org.la.http;
 
+import edu.byu.wso2.core.Wso2Credentials;
+import edu.byu.wso2.core.provider.ClientCredentialOauthTokenProvider;
+import edu.byu.wso2.core.provider.ClientCredentialsTokenHeaderProvider;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -51,6 +54,32 @@ public class ApacheCommonsHttpClient implements HttpRest {
         log.debug(strOut);
         if (verbose) System.out.println(strOut);
 
+        /* Set default headers */
+//        getMethod.addRequestHeader("Accept-Charset", "utf-8");
+//        getMethod.addRequestHeader("Accept","text/plain");
+        getMethod.addRequestHeader("Accept","application/xml;application/json");
+
+        /* Add headers from command line */
+        if (!headers.isEmpty()) {
+            for (Map.Entry<String, String> header : headers.entrySet()) {
+                getMethod.addRequestHeader(header.getKey(), header.getValue());
+            }
+        }
+
+        if (consumerKey != null && !consumerKey.equals("") ) {
+            /* Generate WSO2 authorization header from consumer key and secret. */
+            ClientCredentialsTokenHeaderProvider tokenHeaderProvider = new ClientCredentialsTokenHeaderProvider(
+                    new ClientCredentialOauthTokenProvider(
+                            new Wso2Credentials(consumerKey, consumerSecret)
+                    )
+            );
+
+            /* Set authorization header. */
+            strOut = strOut + "Get Authorization token: " + tokenHeaderProvider.getTokenHeaderValue() + "\n";
+            getMethod.addRequestHeader("Authorization", tokenHeaderProvider.getTokenHeaderValue());
+        }
+
+        /* Send request and get response */
         try {
             int responseCode = client.executeMethod(getMethod);
 
