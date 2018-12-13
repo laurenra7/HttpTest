@@ -14,6 +14,10 @@ public interface HttpRest {
 
     public void setHeaders(Map<String, String> headers);
 
+    public Map<String, String> getQueries();
+
+    public void setQueries(Map<String, String> queries);
+
     public String getConsumerKey();
 
     public void setConsumerKey(String consumerKey);

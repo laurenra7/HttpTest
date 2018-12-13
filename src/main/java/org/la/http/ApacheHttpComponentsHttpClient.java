@@ -26,6 +26,7 @@ public class ApacheHttpComponentsHttpClient implements HttpRest {
     private String consumerSecret;
     private boolean verbose;
     private Map<String, String> headers;
+    private Map<String, String> queries;
     private String consumerKey;
 
     
@@ -165,8 +166,19 @@ public class ApacheHttpComponentsHttpClient implements HttpRest {
         return headers;
     }
 
+    @Override
     public void setHeaders(Map<String, String> headers) {
         this.headers = headers;
+    }
+
+    @Override
+    public Map<String, String> getQueries() {
+        return queries;
+    }
+
+    @Override
+    public void setQueries(Map<String, String> queries) {
+        this.queries = queries;
     }
 
     @Override

@@ -100,7 +100,9 @@ public class HttpTest {
                 "  -If no library is specified, SpringRestTemplate is used. The libraries are:\n\n" +
                 HttpLib.prettyList() + "\n\n" +
                 "  The Apache Commons HttpClient was widely used until a few years ago but it\n" +
-                "  has been deprecated and replaced by HttpComponents HttpClient.\n\n";
+                "  has been deprecated and replaced by HttpComponents HttpClient.\n\n" +
+                "  You can use query parameters, but if it fails, URL encode the parameters\n" +
+                "  and try again.\n\n";
 
         System.out.println("");
         HelpFormatter helpFormatter = new HelpFormatter();
@@ -185,6 +187,14 @@ public class HttpTest {
                 .longOpt("verbose")
                 .desc("Show request/response details and processing messages")
                 .build());
+
+//        clOptions.addOption(Option.builder("y")
+//                .longOpt("query")
+//                .desc("(not fully implemented) Add query. Add multiple queries with additional -y. Use commas to separate multiple parameters in query. See examples.")
+//                .numberOfArgs(2)
+//                .valueSeparator()
+//                .argName("query")
+//                .build());
 
         if(args.length == 0) {
             showDetailedHelp(clOptions);
@@ -310,28 +320,7 @@ public class HttpTest {
 
                 /* Get headers and add them to the HTTP request */
                 if (commandLine.hasOption("add-header")) {
-                    String[] headers = commandLine.getOptionValues("add-header");
-
-                    Map<String, String> headersMap = new HashMap<String, String>();
-                    /* Even-numbered strings in array are keys, odd-numbered are values */
-                    int i = 0;
-                    String headerKey = "";
-                    String headerValue = "";
-                    for (String element: headers) {
-                        if (i % 2 == 0) {
-                            /* even is header name (key) */
-                            headerKey = element;
-                        }
-                        else {
-                            /* odd is header value */
-                            headerValue = element;
-                            /* replace commas separating values with semicolons (for valid multi-value headers) */
-                            headersMap.put(headerKey, headerValue.replaceAll(",", ";"));
-                            headerKey = "";
-                            headerValue = "";
-                        }
-                        i++;
-                    }
+                    Map<String, String> headersMap = mapEntries(commandLine.getOptionValues("add-header"));
 
                     /* Show headers entered from command line */
                     if (verbose) {
@@ -342,6 +331,21 @@ public class HttpTest {
                     }
 
                     httpRestService.setHeaders(headersMap);
+                }
+
+                /* Get query(ies) and add them to the HTTP request */
+                if (commandLine.hasOption("query")) {
+                    Map<String, String> queriesMap = mapEntries(commandLine.getOptionValues("query"));
+
+                    /* Show headers entered from command line */
+                    if (verbose) {
+                        System.out.println("Queries to be added:");
+                        for (Map.Entry<String, String> entry : queriesMap.entrySet()) {
+                            System.out.println("\t" + entry.getKey() + ": " + entry.getValue());
+                        }
+                    }
+
+                    httpRestService.setQueries(queriesMap);
                 }
 
                 /* Get HTTP method and make HTTP request */
@@ -397,32 +401,32 @@ public class HttpTest {
     }
 
 
-//    private static void doGetApacheCommons(String url, String outputFilename, boolean modeVerbose) {
-//        ApacheCommonsHttpClient httpClient = new ApacheCommonsHttpClient();
-//        String response = httpClient.httpGet(url);
-//        if (response != null && response.length() > 0) {
-//            if (outputFilename != null && outputFilename.length() > 0) {
-//                writeStringToFile(response, outputFilename);
-//            }
-//            else {
-//                System.out.println(response);
-//            }
-//        }
-//    }
+    private static Map<String, String> mapEntries(String [] arrayEntries) {
 
+        Map<String, String> entriesMap = new HashMap<String, String>();
 
-//    private static void doGetApacheHttpComponents(String url, String outputFilename, boolean modeVerbose) {
-//        ApacheHttpComponentsHttpClient httpClient = new ApacheHttpComponentsHttpClient();
-//        String response = httpClient.httpGet(url, modeVerbose);
-//        if (response != null && response.length() > 0) {
-//            if (outputFilename != null && outputFilename.length() > 0) {
-//                writeStringToFile(response, outputFilename);
-//            }
-//            else {
-//                System.out.println(response);
-//            }
-//        }
-//    }
+        /* Even-numbered strings in array are keys, odd-numbered are values */
+        int i = 0;
+        String entryKey = "";
+        String entryValue = "";
+        for (String element: arrayEntries) {
+            if (i % 2 == 0) {
+                /* even is header name (key) */
+                entryKey = element;
+            }
+            else {
+                /* odd is header value */
+                entryValue = element;
+                /* replace commas separating values with semicolons (for valid multi-value headers) */
+                entriesMap.put(entryKey, entryValue.replaceAll(",", ";"));
+                entryKey = "";
+                entryValue = "";
+            }
+            i++;
+        }
+
+        return entriesMap;
+    }
 
 
     private static int writeStringToFile(String outputString, String outputFilename) {

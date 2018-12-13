@@ -38,6 +38,16 @@ public class MockHttpRest implements HttpRest {
     }
 
     @Override
+    public Map<String, String> getQueries() {
+        return null;
+    }
+
+    @Override
+    public void setQueries(Map<String, String> queries) {
+
+    }
+
+    @Override
     public String getConsumerKey() {
         return null;
     }
